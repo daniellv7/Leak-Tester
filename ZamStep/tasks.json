@@ -1,0 +1,42 @@
+[
+  {
+    "Name": "CurtainTask",
+    "Description": "some description",
+    "IsPresent": true
+  },
+  {
+    "Name": "DO_1Task",
+    "Description": "some description2",
+    "IsPresent": true
+  },
+  {
+    "Name": "DO_2Task",
+    "Description": "some description3",
+    "IsPresent": true
+  },
+  {
+    "Name": "EmergencyStopTask",
+    "Description": "some description3",
+    "IsPresent": true
+  },
+  {
+    "Name": "SensorPresenceTask",
+    "Description": "some description3",
+    "IsPresent": true
+  },
+  {
+    "Name": "ReadVoltageAI1",
+    "Description": "some description3",
+    "IsPresent": true
+  },
+  {
+    "Name": "ReadVoltageAI8",
+    "Description": "some description3",
+    "IsPresent": true
+  }, 
+  {
+    "Name": "OutputVoltageAO1",
+    "Description": "some description3",
+    "IsPresent": true
+  }
+]

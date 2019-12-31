@@ -1,0 +1,511 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E27A66F1-CCBD-4072-8AD7-C561E9CB0228}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SSR</RootNamespace>
+    <AssemblyName>SSR</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>1FE97A96B68AD81A85B0F302737F9FBD83C206BB</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>SSR_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SSR.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Agilent.DMM34401">
+      <HintPath>..\..\Agilent.DMM34401\Agilent.DMM34401\bin\Debug\Agilent.DMM34401.dll</HintPath>
+    </Reference>
+    <Reference Include="AVT">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\..\FLM\Assemblies\AVT.dll</HintPath>
+    </Reference>
+    <Reference Include="CL_200A_lib">
+      <HintPath>..\..\..\..\..\..\..\ELO\Assemblies\CL_200A_lib.dll</HintPath>
+    </Reference>
+    <Reference Include="EpsonTMU220, Version=1.1.0.1, Culture=neutral, PublicKeyToken=d1431e2eaaa3c2b7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\SSR\Assemblies\EpsonTMU220.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ITAC">
+      <HintPath>..\..\itac\ITAC.dll</HintPath>
+    </Reference>
+    <Reference Include="Ivi.Driver, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a128c98f1d7717c1, processorArchitecture=MSIL" />
+    <Reference Include="Ivi.Swtch, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a128c98f1d7717c1, processorArchitecture=MSIL" />
+    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.0.9.7\lib\net40\LiveCharts.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="LiveCharts.WinForms, Version=0.9.7.1, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.WinForms.0.9.7.1\lib\net40\LiveCharts.WinForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net40\LiveCharts.Wpf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Logger, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Logger\Logger\bin\Debug\Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="NationalInstruments.Common, Version=15.1.40.49152, Culture=neutral, PublicKeyToken=dc6ad606294fc298" />
+    <Reference Include="NationalInstruments.DAQmx, Version=16.1.40.70, Culture=neutral, PublicKeyToken=dc6ad606294fc298, processorArchitecture=x86" />
+    <Reference Include="NationalInstruments.ModularInstruments.Common, Version=1.4.40.18, Culture=neutral, PublicKeyToken=dc6ad606294fc298, processorArchitecture=MSIL" />
+    <Reference Include="NationalInstruments.ModularInstruments.ModularInstrumentsSystem, Version=1.4.40.26, Culture=neutral, PublicKeyToken=dc6ad606294fc298, processorArchitecture=MSIL" />
+    <Reference Include="NationalInstruments.ModularInstruments.NIDmm.Fx40, Version=15.2.0.49153, Culture=neutral, PublicKeyToken=dc6ad606294fc298, processorArchitecture=MSIL" />
+    <Reference Include="NationalInstruments.ModularInstruments.NISwitch.Fx40, Version=1.1.40.167, Culture=neutral, PublicKeyToken=dc6ad606294fc298, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\..\..\..\..\..\Proyectos\2018\Zamtest\Diagnostic Panel\Newtonsoft.Json.11.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PEMicro.Cyclone, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CycloneTest\CycloneTest\bin\Debug\PEMicro.Cyclone.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="ServerConnection">
+      <HintPath>..\..\ServerConnection\ServerConnection\bin\Debug\ServerConnection.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="Zamtest.Cognex.DMXX, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\source\repos\Zamtest.Cognex.DMXX\Zamtest.Cognex.DMXX\bin\Debug\Zamtest.Cognex.DMXX.dll</HintPath>
+    </Reference>
+    <Reference Include="Zamtest.Generic.RS232, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\..\..\..\FLM\Assemblies\Zamtest.Generic.RS232.dll</HintPath>
+    </Reference>
+    <Reference Include="Zamtest.Keyence.SR">
+      <HintPath>..\..\Zamtest.Keyence.SR\Zamtest.Keyence.SR\bin\Debug\Zamtest.Keyence.SR.dll</HintPath>
+    </Reference>
+    <Reference Include="Zamtest.Keysight.E3644A, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Zamtest.Keysight.E3649A\Zamtest.Keysight.E3644A\bin\Debug\Zamtest.Keysight.E3644A.dll</HintPath>
+    </Reference>
+    <Reference Include="Zamtest.PEMicro.CycloneUniversal">
+      <HintPath>..\..\Zamtest.PEMicro.CycloneUniversal\Zamtest.PEMicro.CycloneUniversal.dll</HintPath>
+    </Reference>
+    <Reference Include="Zamtest.Utilities.Itac, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\Leak Tester\Assemblies\Zamtest.Utilities.Itac.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTask.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTask.designer.cs">
+      <DependentUpon>ControlTask.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTaskType.cs" />
+    <Compile Include="Devices.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Devices.Designer.cs">
+      <DependentUpon>Devices.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Diagnostic.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Diagnostic.designer.cs">
+      <DependentUpon>Diagnostic.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormCollection.cs" />
+    <Compile Include="Graph.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Graph.designer.cs">
+      <DependentUpon>Graph.cs</DependentUpon>
+    </Compile>
+    <Compile Include="JSonUtilities.cs" />
+    <Compile Include="ManagementEventApplication.cs" />
+    <Compile Include="MeasureModel.cs" />
+    <Compile Include="NestConfiguration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NestConfiguration.Designer.cs">
+      <DependentUpon>NestConfiguration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EventLogger.cs" />
+    <Compile Include="Instruments.cs" />
+    <Compile Include="MDIPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MDIPrincipal.Designer.cs">
+      <DependentUpon>MDIPrincipal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadDigitalInput.cs" />
+    <Compile Include="Result.cs" />
+    <Compile Include="Sequence.cs" />
+    <Compile Include="SetDigitalOutput.cs" />
+    <Compile Include="SMCSlider.cs" />
+    <Compile Include="Splash.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Splash.designer.cs">
+      <DependentUpon>Splash.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TaskManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TaskManager.designer.cs">
+      <DependentUpon>TaskManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestForm.Designer.cs">
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucAnalogInput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucAnalogInput.Designer.cs">
+      <DependentUpon>ucAnalogInput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucAnalogOutput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucAnalogOutput.Designer.cs">
+      <DependentUpon>ucAnalogOutput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucDigitalInput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucDigitalInput.Designer.cs">
+      <DependentUpon>ucDigitalInput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ucDigitalOutput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucDigitalOutput.Designer.cs">
+      <DependentUpon>ucDigitalOutput.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserMgt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserMgt.Designer.cs">
+      <DependentUpon>UserMgt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utils.cs" />
+    <Compile Include="XMLUtils.cs" />
+    <EmbeddedResource Include="About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTask.resx">
+      <DependentUpon>ControlTask.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Devices.resx">
+      <DependentUpon>Devices.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Diagnostic.resx">
+      <DependentUpon>Diagnostic.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Graph.resx">
+      <DependentUpon>Graph.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NestConfiguration.resx">
+      <DependentUpon>NestConfiguration.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDIPrincipal.resx">
+      <DependentUpon>MDIPrincipal.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Splash.resx">
+      <DependentUpon>Splash.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TaskManager.resx">
+      <DependentUpon>TaskManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestForm.resx">
+      <DependentUpon>TestForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucAnalogInput.resx">
+      <DependentUpon>ucAnalogInput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucAnalogOutput.resx">
+      <DependentUpon>ucAnalogOutput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucDigitalInput.resx">
+      <DependentUpon>ucDigitalInput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucDigitalOutput.resx">
+      <DependentUpon>ucDigitalOutput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserMgt.resx">
+      <DependentUpon>UserMgt.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\add_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\remov_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edit_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\open_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\group_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\save_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\play_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\splay_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\srch_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\down_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\user_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\help_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\copy_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\docs_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\paste_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\close_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 y x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\confg_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\group_24x241.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edit_24x241.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\prefs_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\about_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\new_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\calc_24x24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\if_params_115702.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\001-subtle-light-pattern-background-texture-vol5.jpg" />
+    <None Include="Resources\group_128x128.png" />
+    <None Include="Resources\Folder-icon.png" />
+    <None Include="Resources\folder.jpg" />
+    <None Include="Resources\confirm.png" />
+    <None Include="Resources\apps_24x24.png" />
+    <Content Include="Resources\blue-tech-circuit-board-technology-animated-background-video-graphic-design-hd-1920x1080_ewva7rwie__F0000.png" />
+    <Content Include="Resources\boton zamtest.png" />
+    <Content Include="Resources\if_button_off_352905.png" />
+    <Content Include="Resources\if_button_on_352904.png" />
+    <Content Include="Resources\if_Citycons_power_1342951.png" />
+    <Content Include="Resources\if_Flickr_1062982.png" />
+    <Content Include="Resources\if_Rounded_-_High_Ultra_Colour20_-_Switch_2250042.png" />
+    <Content Include="Resources\if_settings_196743.png" />
+    <Content Include="Resources\if_trends_1054952.png" />
+    <Content Include="Resources\itemsAI.jpg" />
+    <Content Include="Resources\itemsAI_focus.jpg" />
+    <Content Include="Resources\itemsAI_selected.jpg" />
+    <Content Include="Resources\itemsAO.jpg" />
+    <Content Include="Resources\itemsAO_focus.jpg" />
+    <Content Include="Resources\itemsAO_selected.jpg" />
+    <Content Include="Resources\itemsDI.jpg" />
+    <Content Include="Resources\itemsDI_focus.jpg" />
+    <Content Include="Resources\itemsDI_selected.jpg" />
+    <Content Include="Resources\itemsDO.jpg" />
+    <Content Include="Resources\itemsDO_focus.jpg" />
+    <Content Include="Resources\itemsDO_selected.jpg" />
+    <Content Include="Resources\Lear.png" />
+    <Content Include="Resources\led-off.png" />
+    <Content Include="Resources\led-on.png" />
+    <Content Include="Resources\logo-zamtest.png" />
+    <None Include="Resources\Tests.ico" />
+    <None Include="Resources\stop2_24x24.png" />
+    <None Include="Resources\stop_24x24.png" />
+    <None Include="Resources\Skip All.png" />
+    <None Include="Resources\savas_24x24.png" />
+    <None Include="Resources\print_24x24.png" />
+    <None Include="Resources\photo.ico" />
+    <None Include="Resources\pause_24x24.png" />
+    <None Include="Resources\opts_24x24.png" />
+    <Content Include="Resources\ref_24x24.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
