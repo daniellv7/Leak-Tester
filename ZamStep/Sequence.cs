@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using NationalInstruments.DAQmx;
-using Zamtest.Cognex.DMXX;
-using Zamtest.PEMicro.CycloneUniversal;
-using Zamtest.Keysight.E3644A;
-using System.Windows.Forms;
-using System.Timers;
-using System.Text;
-using CL_200A_LIB;
-using Zamtest.Generic.RS232;
 
 namespace SSR
 {
@@ -27,51 +17,69 @@ namespace SSR
         {
             return true;
         }
-        //private enum CHASSIS_BOARDS
-        //{
-        //    PXI_6365 = 1,
-        //    PXI_6254,
-        //    PXI_4065
-
-        //}
 
         string result;
         double resultTemp;
-        //internal Task Paro;
-        //internal DigitalSingleChannelReader DIParo;
-
 
         public object[] SetDigitalOutput()
         {
-
-            if (form.Test[form.testCounter].response == "close")
+            try
             {
-
-                MDIPrincipal.Singleton.setDigitalOutput.setDOSignals(form.Signal[form.Test[form.testCounter].param].relay, true);
+                using (Task myTask = DaqSystem.Local.LoadTask(form.Signal[form.Test[form.testCounter].param].relay))
+                {
+                    DigitalSingleChannelWriter dscw = new DigitalSingleChannelWriter(myTask.Stream);
+                    if (form.Test[form.testCounter].response == "close")
+                        dscw.WriteSingleSampleSingleLine(false, true);
+                    else
+                        dscw.WriteSingleSampleSingleLine(false, true);
+                }
                 Thread.Sleep(50);
-                //MDIPrincipal.Singleton.setDigitalOutput.setDOSignals(form.Signal[form.Test[form.testCounter].param].relay, false);
+                return new object[] { true, "Digital Output Set" };
             }
-
-            else
+            catch (Exception ex)
             {
-                MDIPrincipal.Singleton.setDigitalOutput.setDOSignals(form.Signal[form.Test[form.testCounter].param].relay, false);
-                Thread.Sleep(50);
-
+                return new object[] { false, ex.ToString() };
             }
-            return new object[] { true, "Digital Output Set" };
+        }
+
+        public object[] ToggleDigitalOutput()
+        {
+            try
+            {
+                using (Task myTask = DaqSystem.Local.LoadTask(form.Signal[form.Test[form.testCounter].param].value))
+                {
+                    DigitalSingleChannelWriter dscw = new DigitalSingleChannelWriter(myTask.Stream);
+                    dscw.WriteSingleSampleSingleLine(false, true);
+                    Thread.Sleep(20);
+                    dscw.WriteSingleSampleSingleLine(false, false);
+                    Thread.Sleep(20);
+                }
+                return new object[] { true, "Digital Output Set" };
+            }
+            catch(Exception ex)
+            {
+                return new object[] { false, ex.ToString() };
+            }
         }
 
         public object[] ReadDigitalInput()
         {
-            bool statusExpected = Convert.ToBoolean(form.Test[form.testCounter].response);
-            //bool status = MDIPrincipal.Singleton.readDigitalInput.readDISignals(form.Signal[form.Test[form.testCounter].param].relay);
-            if (statusExpected)
+            try
             {
-                return new object[] { true, "Successful digital read" };
+                bool expectedStatus = Convert.ToBoolean(form.Test[form.testCounter].response);
+                using (Task myTask = DaqSystem.Local.LoadTask(form.Signal[form.Test[form.testCounter].param].relay))
+                {
+                    DigitalSingleChannelReader dscr = new DigitalSingleChannelReader(myTask.Stream);
+                    bool status = dscr.ReadSingleSampleSingleLine();
+                    if (expectedStatus == status)
+                        return new object[] { true, "Successful digital read" };
+                    else
+                        return new object[] { true, "Fail in digital read" };
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return new object[] { true, "Fail in digital read" };
+                return new object[] { false, ex.ToString() };
             }
         }
 
@@ -80,27 +88,14 @@ namespace SSR
             form.InstrumentsInstance.rs232.buffer.Clear();
             form.InstrumentsInstance.rs232.response = null;
             form.InstrumentsInstance.rs232.Response = null;
-            bool r = form.InstrumentsInstance.rs232.SendCommand("");
-            if (!r)
-            {
-                // Error
+            if (form.InstrumentsInstance.rs232.SendCommand(""))
                 return new object[] { false, "Bad response." };
-            }
-            do
+            while (form.InstrumentsInstance.rs232.Response == null)
             {
+                Thread.Sleep(0);
             }
-            while (form.InstrumentsInstance.rs232.Response == null);
             string[] leak = {""};
             string[] leak2 = {""};
-            //if (leak2[1] != "ACK,\n")
-            //{
-            //    string temp = leak2[1].Replace("mbar", "")/*.Replace("Pa", "")*/;
-            //    resultTemp = Convert.ToDouble(temp);
-            //}
-            //else
-            //{
-            //    resultTemp = 0;
-            //}
             try
             {
                 leak = form.InstrumentsInstance.rs232.Response.Split('(');
@@ -109,11 +104,9 @@ namespace SSR
                     leak2 = leak[1].Split(':');
                 }
                 else
-                    return new object[] { false, "Response unexpected" };
+                    return new object[] { false, "Unexpected response" };
                 if (form.InstrumentsInstance.rs232.Response.Contains("(OK)"))
                 {
-
-
                     string temp = leak2[1]/*.Replace("mbar", "")*/.Replace("Pa/s\r\n", "");
                     if (temp.Contains("Pa"))
                     {
@@ -147,97 +140,5 @@ namespace SSR
             }
 
         }
-
-        //    private string response = string.Empty;
-
-        //    public object[] SetDigitalOutput()
-        //    {
-        //        if (form.Test[form.testCounter].response == "close")
-        //        {
-
-        //            MDIPrincipal.Singleton.setDigitalOutput.setDOSignals(form.Signal[form.Test[form.testCounter].param].relay, true);
-        //            Thread.Sleep(50);
-        //        }
-
-        //        else
-        //        {
-        //            MDIPrincipal.Singleton.setDigitalOutput.setDOSignals(form.Signal[form.Test[form.testCounter].param].relay, false);
-        //            Thread.Sleep(50);
-
-        //        }
-        //        return new object[] { true, "Digital Output Set" };
-        //    }
-
-        //public object[] ScanQRCodeModule()
-        //{
-        //    int counter = 0;
-        //    while (counter < 5 && TestForm.barCode == "")
-        //    {
-        //        TestForm.barCode = Instruments.Singleton.scanner.Scan();
-        //        counter++;
-        //    }
-        //    if (TestForm.barCode.Contains(MDIPrincipal.Singleton.selectedVariant))
-        //        return new object[] { true, "QR Code ok, Code: " + TestForm.barCode };
-        //    else
-        //        return new object[] { false, "QR Code Incorrect, Code: " + TestForm.barCode };
-        //}
-        //    public object[] SendAndReadTramaCAN()
-        //    {
-        //        string[] tramaInfo = form.Test[form.testCounter].command.Split(',');
-        //        string[] responseInfo = form.Test[form.testCounter].response.Split(',');
-        //        Instruments.Singleton.avt.CAN0.Send(tramaInfo[0], tramaInfo[1]);
-        //        Instruments.Singleton.canFrame = Instruments.Singleton.avt.Events.CAN.GetByID(Convert.ToUInt32(responseInfo[0]), AVT.Enums.Channel.CAN_0, 2000);
-        //        if (responseInfo[1] == Instruments.Singleton.canFrame.Data)
-        //            return new object[] { true, "Expected: " + responseInfo[1] + " Recived: " + Instruments.Singleton.canFrame.Data };
-        //        else
-        //            return new object[] { false, "Expected: " + responseInfo[1] + " Recived: " + Instruments.Singleton.canFrame.Data };
-        //    }
-        //    public object[] MeasAIVoltage()
-        //    {
-        //        int ElapsedTime = Convert.ToInt32(form.Test[form.testCounter].command);
-        //        double meas = 0;
-        //        int cycle = 0;
-        //        double average = 0;
-        //        Task measTask = new Task();
-        //        measTask.AIChannels.CreateVoltageChannel(form.Signal[form.Test[form.testCounter].param].relay, "", AITerminalConfiguration.Rse, -10, 10, AIVoltageUnits.Volts);
-        //        AnalogSingleChannelReader AImeas = new AnalogSingleChannelReader(measTask.Stream);
-
-        //        Stopwatch watcher = new Stopwatch();
-        //        do
-        //        {
-        //            meas += AImeas.ReadSingleSample();
-        //            cycle++;
-        //        } while (watcher.ElapsedMilliseconds <= ElapsedTime);
-        //        average = meas / cycle;
-        //        if (!Utils.Singleton.MathOperator[form.Test[form.testCounter].limit].Invoke(double.Parse(form.Test[form.testCounter].low), average, double.Parse(form.Test[form.testCounter].high)))
-        //        {
-        //            measTask.Dispose();
-        //            return new object[] { false, "Average: " + average.ToString("D4") };
-        //        }
-        //        else
-        //        {
-        //            measTask.Dispose();
-        //            return new object[] { true, "Average: " + average.ToString("D4") };
-        //        }
-        //    }
-        //    public object[] MeasCurrentDMM()
-        //    {
-        //        int ElapsedTime = Convert.ToInt32(form.Test[form.testCounter].command);
-        //        double meas = 0;
-        //        int cycle = 0;
-        //        double average = 0;
-
-        //        Stopwatch watcher = new Stopwatch();
-        //        do
-        //        {
-        //            meas += Instruments.Singleton.dmm.Measurement.Read();
-        //            cycle++;
-        //        } while (watcher.ElapsedMilliseconds <= ElapsedTime);
-        //        average = meas / cycle;
-        //        if (!Utils.Singleton.MathOperator[form.Test[form.testCounter].limit].Invoke(double.Parse(form.Test[form.testCounter].low), average, double.Parse(form.Test[form.testCounter].high)))
-        //            return new object[] { false, "Average: " + average.ToString("D4") };
-        //        else
-        //            return new object[] { true, "Average: " + average.ToString("D4") };
-        //    }
     }
 }

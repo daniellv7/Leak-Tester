@@ -44,11 +44,9 @@ namespace SSR
         internal Color TESTING = Color.Yellow;
         private Stopwatch elapsedTimeStopWatch;
         private TimeSpan elapsedTimeSpan;
-        public int mState;
-        public int mState2;
+        public int state;
         //internal AutoResetEvent sync;
         public object[] testResult = new object[1];
-        private object[] result = { };
         public static string barCode = string.Empty;
         internal int testCounter;
         private int failsCounter;
@@ -62,6 +60,7 @@ namespace SSR
         public string[] seed;
         public string[] key;
         public string[] secret;
+
         public Thread LauncherSequence { get; set; }
         public bool IsRunning { get; set; }
         internal bool IsTerminated { get; set; }
@@ -99,33 +98,15 @@ namespace SSR
         List<Classes.Measure> measurements = new List<Classes.Measure>();
         public bool IsNest1Running;
         public bool IsNest2Running;
-        //
-        // Summary:
-        //     Gets an array of forms that represent the multiple-document interface (MDI) child
-        //     forms that are parented to this form.
-        //
-        // Returns:
-        //     An array of System.Windows.Forms.Form objects, each of which identifies one of
-        //     this form's MDI child forms.
-        public Form[] Sequencechildren { get; }
-
         private LogFile log;
         private serverConnection server = new serverConnection();
-
-        ///*SEÑALES DE CONTROL AQUI*/
-        //internal Task PistonOffTask, PistonOnTask, PresenciaTask, TapaCerradaTask, ParoTask;
-        //internal AnalogSingleChannelReader AIPistonOff, AIPistonOn, AIPresencia, AITapaCerrada, AIParoEmergencia;
-
-        ////OUTPUTS FOR CONTROL EQUIPMENT
-        //internal Task InterlockTask, ElectrovalvulaTask;
-        //internal DigitalSingleChannelWriter DOInterlock, DOElectrovalvula;
 
         //OUTPUTS FOR CONTROL EQUIPMENT
         internal Task GreenLight, RedLight, YellowLight, PistonON, PistonOFF, Start, Reset;
         internal DigitalSingleChannelWriter DOGreenLight, DORedLight, DOYellowLight, DOPistonON, DOPistonOFF, DOStart, DOReset;
 
-        internal Task Paro, Optos, Pieza, Empaque, CarreraOFF, CarreraON, PiezaCorrecta, PiezaDefectuosa, Alarma, FinCiclo;
-        internal DigitalSingleChannelReader DIParo, DIOptos, DIPieza, DIEmpaque, DICarreraOFF, DICarreraON, DIPiezaCorrecta, DIPiezaDefectuosa, DIAlarma, DIFinCiclo;
+        internal Task Optos, Pieza, Empaque, CarreraOFF, CarreraON;
+        internal DigitalSingleChannelReader DIOptos, DIPieza, DIEmpaque, DICarreraOFF, DICarreraON;
 
 
 
@@ -228,7 +209,7 @@ namespace SSR
             INITIALIZATION = 0,
             HOME,
             REMOVE_PIECE,
-            PLACE_PIECE,
+            INSERT_PIECE,
             PACKAGE,
             SCAN,
             ITAC,
@@ -312,7 +293,6 @@ namespace SSR
             XMLUtils.Singleton.LoadVariablesToDictionary(this.Name, ref f);
             XMLUtils.Singleton.LoadInstrumentsToDictionary(this.Name, ref f);
             xmlInstance.LoadSettings();
-            InitializingSignals();
         }
 
         public void StartSequence()
@@ -325,12 +305,7 @@ namespace SSR
             elapsedTimeStopWatch = new Stopwatch();
             elapsedTimeSpan = new TimeSpan();
             log = new LogFile();
-            loop = true;
-            //barCode = string.Empty;
             f.Invoke(new Action(() => f.richTextBoxDUTTrace.Text = ""));
-            //XMLUtils.Singleton.LoadSignalsToDictionary(this.Name, ref f);
-            //XMLUtils.Singleton.LoadTestsToDictionary(this.Name, ref f);
-            //XMLUtils.Singleton.LoadVariablesToDictionary(this.Name, ref f);
             SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PROBANDO...");
             SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
             SetControlPropertyValue(labelStatusPiece, "Text", "ESPERANDO...");
@@ -340,14 +315,7 @@ namespace SSR
             Type sequenceType = currentAssembly.GetType("SSR.Sequence");
             object assemblyInstance = Activator.CreateInstance(sequenceType, this);
 
-
-            //if (!DIParo.ReadSingleSampleSingleLine())
-            //{
-            //    DOReset.WriteSingleSampleSingleLine(true, true);
-            //    mState = (int)estado.PARO;
-            //}
-
-            while (loop)
+            while (IsRunning)
             {
                 this.Invoke(setElapsedTime, new object[] { "" });
                 this.Invoke(clearListView);
@@ -520,13 +488,6 @@ namespace SSR
                             log.OverWriteFileNameWithTestResult(serialNumber, false);
                             log.OverWriteTestTime(elapsedTimeSpan.ToString());
                         }
-                        //if(f is TestForm)
-                        //{
-                        //    ((TestForm)f).Signal.Clear();
-                        //    ((TestForm)f).Test.Clear();
-                        //    ((TestForm)f).Variable.Clear();
-                        //}
-                        //mState = 9;
                         break;
                     }
                 }
@@ -553,13 +514,6 @@ namespace SSR
                         log.OverWriteFileNameWithTestResult(serialNumber, true);
                         log.OverWriteTestTime(elapsedTimeSpan.ToString());
                     }
-                    //if (f is TestForm)
-                    //{
-                    //    ((TestForm)f).Signal.Clear();
-                    //    ((TestForm)f).Test.Clear();
-                    //    ((TestForm)f).Variable.Clear();
-                    //}
-                   
                     break;
                 }
             }
@@ -601,122 +555,6 @@ namespace SSR
                 + "Response: " + response + "\n"
                 + "Received: " + received, epsonTMU220.PrintColor.Red);
         }
-
-        public bool InitializingSignals()
-        {
-            try
-            {
-                ////OUTPUTS FOR CONTROL EQUIPMENT
-                Reset = new Task();
-                Reset.DOChannels.CreateChannel(Signal["RESET"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOReset = new DigitalSingleChannelWriter(Reset.Stream);
-
-                Start = new Task();
-                Start.DOChannels.CreateChannel(Signal["START"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOStart = new DigitalSingleChannelWriter(Reset.Stream);
-
-                GreenLight = new Task();
-                GreenLight.DOChannels.CreateChannel(Signal["LUZVERDE"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOGreenLight = new DigitalSingleChannelWriter(GreenLight.Stream);
-
-                RedLight = new Task();
-                RedLight.DOChannels.CreateChannel(Signal["LUZROJA"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DORedLight = new DigitalSingleChannelWriter(RedLight.Stream);
-
-                YellowLight = new Task();
-                YellowLight.DOChannels.CreateChannel(Signal["LUZAMBAR"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOYellowLight = new DigitalSingleChannelWriter(YellowLight.Stream);
-
-                PistonOFF = new Task();
-                PistonOFF.DOChannels.CreateChannel(Signal["PistonOFF"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOPistonOFF = new DigitalSingleChannelWriter(PistonOFF.Stream);
-
-                PistonON = new Task();
-                PistonON.DOChannels.CreateChannel(Signal["PistonON"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOPistonON = new DigitalSingleChannelWriter(PistonON.Stream);
-
-                Paro = new Task();
-                Paro.DIChannels.CreateChannel(Signal["PARO"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DIParo = new DigitalSingleChannelReader(Paro.Stream);
-
-                //Paro1 = new Task();
-                //Paro1.DIChannels.CreateChannel(Signal["PARO"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                //DIParo1 = new DigitalSingleChannelReader(Paro1.Stream);
-
-                //ParoN2 = new Task();
-                //ParoN2.DIChannels.CreateChannel(Signal["DIO1/Port1/Line2"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                //DIParoN2 = new DigitalSingleChannelReader(ParoN2.Stream);
-
-                Optos = new Task();
-                Optos.DIChannels.CreateChannel(Signal["OPTOS"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DIOptos = new DigitalSingleChannelReader(Optos.Stream);
-
-                Pieza = new Task();
-                Pieza.DIChannels.CreateChannel(Signal["PIEZA"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DIPieza = new DigitalSingleChannelReader(Pieza.Stream);
-
-                Empaque = new Task();
-                Empaque.DIChannels.CreateChannel(Signal["EMPAQUE"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DIEmpaque = new DigitalSingleChannelReader(Empaque.Stream);
-
-                CarreraOFF = new Task();
-                CarreraOFF.DIChannels.CreateChannel(Signal["CarreraOFF"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DICarreraOFF = new DigitalSingleChannelReader(CarreraOFF.Stream);
-
-                CarreraON = new Task();
-                CarreraON.DIChannels.CreateChannel(Signal["CarreraON"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DICarreraON = new DigitalSingleChannelReader(CarreraON.Stream);
-
-                return true;
-            }
-            catch (DaqException ex)
-            {
-                MessageBox.Show(ex.Message);
-                return false;
-            }
-        }
-
-        //private bool InitializingSignals()
-        //{
-        //    try
-        //    {
-        //        ////OUTPUTS FOR CONTROL EQUIPMENT
-        //        PistonOffTask = new Task();
-        //        PistonOffTask.AIChannels.CreateVoltageChannel(Signal["SENSOR_PISTON_OFF"].relay, "", AITerminalConfiguration.Rse, -10, 10, AIVoltageUnits.Volts);
-        //        AIPistonOff = new AnalogSingleChannelReader(PistonOffTask.Stream);
-
-        //        PistonOnTask = new Task();
-        //        PistonOnTask.AIChannels.CreateVoltageChannel(Signal["SENSOR_PISTON_ON"].relay, "", AITerminalConfiguration.Rse, -10, 10, AIVoltageUnits.Volts);
-        //        AIPistonOn = new AnalogSingleChannelReader(PistonOnTask.Stream);
-
-        //        PresenciaTask = new Task();
-        //        PresenciaTask.AIChannels.CreateVoltageChannel(Signal["SENSOR_PRESENCIA"].relay, "", AITerminalConfiguration.Rse, -10, 10, AIVoltageUnits.Volts);
-        //        AIPresencia = new AnalogSingleChannelReader(PresenciaTask.Stream);
-
-        //        TapaCerradaTask = new Task();
-        //        TapaCerradaTask.AIChannels.CreateVoltageChannel(Signal["SENSOR_TAPA_CERRADA"].relay, "", AITerminalConfiguration.Rse, -10, 10, AIVoltageUnits.Volts);
-        //        AITapaCerrada = new AnalogSingleChannelReader(TapaCerradaTask.Stream);
-
-        //        ParoTask = new Task();
-        //        ParoTask.AIChannels.CreateVoltageChannel(Signal["PARO_EMERGENCIA"].relay, "", AITerminalConfiguration.Rse, -10, 10, AIVoltageUnits.Volts);
-        //        AIParoEmergencia = new AnalogSingleChannelReader(ParoTask.Stream);
-
-        //        ElectrovalvulaTask = new Task();
-        //        ElectrovalvulaTask.DOChannels.CreateChannel(Signal["ELECTROVALVULA"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-        //        DOElectrovalvula = new DigitalSingleChannelWriter(ElectrovalvulaTask.Stream);
-
-        //        InterlockTask = new Task();
-        //        InterlockTask.DOChannels.CreateChannel(Signal["INTERLOCK"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-        //        DOInterlock = new DigitalSingleChannelWriter(InterlockTask.Stream);
-
-        //        return true;
-        //    }
-        //    catch (DaqException ex)
-        //    {
-        //        MessageBox.Show(ex.Message);
-        //        return false;
-        //    }
-        //}
 
         private void CheckInitialState()
         {
@@ -790,22 +628,66 @@ namespace SSR
             }
         }
 
-        //private object[] ActivatePiston()
-        //{
-            //try
-            //{
-            //    DOEVMain.WriteSingleSampleSingleLine(true, true);
-            //    Thread.Sleep(100);
-            //    DOEVPiston.WriteSingleSampleSingleLine(true, true);
-            //    WriteLog(richTextBoxDUTTrace, "Activing piston", TraceLevel.Info);
-            //    return new object[] { true, "Piston activated" };
-            //}
-            //catch (Exception ex)
-            //{
-            //    WriteLog(richTextBoxDUTTrace, "Piston cannot be activated -" + ex.Message, TraceLevel.Error);
-            //    return new object[] { false, "Error activing piston" + ex.Message };
-            //}
-        //}
+        public bool InitializingSignals()
+        {
+            try
+            {
+                ////OUTPUTS FOR CONTROL EQUIPMENT
+                Reset = new Task();
+                Reset.DOChannels.CreateChannel(Signal[$"ACT_ATEQ_RESET_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOReset = new DigitalSingleChannelWriter(Reset.Stream);
+
+                Start = new Task();
+                Start.DOChannels.CreateChannel(Signal[$"ACT_ATEQ_START_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOStart = new DigitalSingleChannelWriter(Reset.Stream);
+
+                GreenLight = new Task();
+                GreenLight.DOChannels.CreateChannel(Signal[$"ACT_SEMAPHORE_GREEN_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOGreenLight = new DigitalSingleChannelWriter(GreenLight.Stream);
+
+                RedLight = new Task();
+                RedLight.DOChannels.CreateChannel(Signal[$"ACT_SEMAPHORE_RED_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DORedLight = new DigitalSingleChannelWriter(RedLight.Stream);
+
+                YellowLight = new Task();
+                YellowLight.DOChannels.CreateChannel(Signal[$"ACT_SEMAPHORE_AMBER_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOYellowLight = new DigitalSingleChannelWriter(YellowLight.Stream);
+
+                PistonOFF = new Task();
+                PistonOFF.DOChannels.CreateChannel(Signal[$"ACT_PISTON_OFF_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOPistonOFF = new DigitalSingleChannelWriter(PistonOFF.Stream);
+
+                PistonON = new Task();
+                PistonON.DOChannels.CreateChannel(Signal[$"ACT_PISTON_ON_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOPistonON = new DigitalSingleChannelWriter(PistonON.Stream);
+
+                Optos = new Task();
+                Optos.DIChannels.CreateChannel(Signal[$"SENS_OPTOS_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DIOptos = new DigitalSingleChannelReader(Optos.Stream);
+
+                Pieza = new Task();
+                Pieza.DIChannels.CreateChannel(Signal[$"SENS_PRESENCE_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DIPieza = new DigitalSingleChannelReader(Pieza.Stream);
+
+                Empaque = new Task();
+                Empaque.DIChannels.CreateChannel(Signal[$"SENS_SEAL_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DIEmpaque = new DigitalSingleChannelReader(Empaque.Stream);
+
+                CarreraOFF = new Task();
+                CarreraOFF.DIChannels.CreateChannel(Signal[$"SENS_PISTON_OFF_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DICarreraOFF = new DigitalSingleChannelReader(CarreraOFF.Stream);
+
+                CarreraON = new Task();
+                CarreraON.DIChannels.CreateChannel(Signal[$"SENS_PISTON_ON_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DICarreraON = new DigitalSingleChannelReader(CarreraON.Stream);
+                return true;
+            }
+            catch (DaqException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return false;
+            }
+        }
 
         private void CheckFinishStateWhenBarCodeFails()
         {
@@ -845,69 +727,6 @@ namespace SSR
             //}
         }
 
-        private void CheckFinishState()
-        {
-            //while (true)
-            //{
-            //    if (error)
-            //    {
-            //        DOYellowLight.WriteSingleSampleSingleLine(true, false);
-            //        DORedLight.WriteSingleSampleSingleLine(true, true);
-            //        DOInterlock.WriteSingleSampleSingleLine(true, true);
-            //        DOEVPiston.WriteSingleSampleSingleLine(true, false);
-            //        if (!DIPresenceSensor.ReadSingleSampleSingleLine() && !DIInterlockSensor.ReadSingleSampleSingleLine())
-            //        {
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "FALLO, ABRA LA COMPUERTA Y RETIRE LA PIEZA");
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-            //        }
-            //        else if (DIPresenceSensor.ReadSingleSampleSingleLine() && !DIInterlockSensor.ReadSingleSampleSingleLine())
-            //        {
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "FALLO, RETIRE LA PIEZA");
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-            //        }
-            //        else
-            //        {
-            //            //if (WaitForContinueOrder)
-            //            //{
-            //            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PASAR AL OTRO NIDO");
-            //            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
-            //            //    if (this.TestCompleted != null)
-            //            //        this.TestCompleted.Invoke(this, new TestCompletedEventArgs() { IsAllOk = false });
-            //            //}
-            //            return;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        DOYellowLight.WriteSingleSampleSingleLine(true, false);
-            //        DOGreenLight.WriteSingleSampleSingleLine(true, true);
-            //        DOInterlock.WriteSingleSampleSingleLine(true, true);
-            //        DOEVPiston.WriteSingleSampleSingleLine(true, false);
-            //        if (DIPresenceSensor.ReadSingleSampleSingleLine() && !DIInterlockSensor.ReadSingleSampleSingleLine())
-            //        {
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PASO, ABRA LA COMPUERTA Y RETIRE LA PIEZA");
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", PASSED);
-            //        }
-            //        else if (DIPresenceSensor.ReadSingleSampleSingleLine() && DIInterlockSensor.ReadSingleSampleSingleLine())
-            //        {
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PASO, RETIRE LA PIEZA");
-            //            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", PASSED);
-            //        }
-            //        else
-            //        {
-            //            //if (WaitForContinueOrder)
-            //            //{
-            //            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PASAR AL OTRO NIDO");
-            //            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
-            //            //    if (this.TestCompleted != null)
-            //            //        this.TestCompleted.Invoke(this, new TestCompletedEventArgs() { IsAllOk = true });
-            //            //}
-            //            return;
-            //        }
-            //    }
-            //}
-        }
-
         private void SetTestResultStatus(ListView listView, int item, int subItem, string text, Color color)
         {
             SetListViewSubItemValues(listView, item, subItem, text, color);
@@ -929,41 +748,6 @@ namespace SSR
 
         private void SetTesterCounters()
         {
-            //if (this.Text.Contains("PCB1"))
-            //{
-            //    this.lblTestedDesc.Text = Properties.Settings.Default.PCBTestedUnits.ToString();
-            //    this.lblGoodDesc.Text = Properties.Settings.Default.PCBPassedUnits.ToString();
-            //    this.lblBadDesc.Text = Properties.Settings.Default.PCBFailedUnits.ToString();
-            //    this.lblYieldDesc.Text = String.Format("{0:0.00}%", Properties.Settings.Default.PCBYield);
-            //}
-            //if (this.Text.Contains("PCB2"))
-            //{
-            //    this.lblTestedDesc.Text = Properties.Settings.Default.PCB2TestedUnits.ToString();
-            //    this.lblGoodDesc.Text = Properties.Settings.Default.PCB2PassedUnits.ToString();
-            //    this.lblBadDesc.Text = Properties.Settings.Default.PCB2FailedUnits.ToString();
-            //    this.lblYieldDesc.Text = String.Format("{0:0.00}%", Properties.Settings.Default.PCB2Yield);
-            //}
-            //if (this.Text.Contains("PCB3"))
-            //{
-            //    this.lblTestedDesc.Text = Properties.Settings.Default.PCB3TestedUnits.ToString();
-            //    this.lblGoodDesc.Text = Properties.Settings.Default.PCB3PassedUnits.ToString();
-            //    this.lblBadDesc.Text = Properties.Settings.Default.PCB3FailedUnits.ToString();
-            //    this.lblYieldDesc.Text = String.Format("{0:0.00}%", Properties.Settings.Default.PCB3Yield);
-            //}
-            //if (this.Text.Contains("PCB4"))
-            //{
-            //    this.lblTestedDesc.Text = Properties.Settings.Default.PCB4TestedUnits.ToString();
-            //    this.lblGoodDesc.Text = Properties.Settings.Default.PCB4PassedUnits.ToString();
-            //    this.lblBadDesc.Text = Properties.Settings.Default.PCB4FailedUnits.ToString();
-            //    this.lblYieldDesc.Text = String.Format("{0:0.00}%", Properties.Settings.Default.PCB4Yield);
-            //}
-            //if (this.Text.Contains("PCB5"))
-            //{
-            //    this.lblTestedDesc.Text = Properties.Settings.Default.PCB5TestedUnits.ToString();
-            //    this.lblGoodDesc.Text = Properties.Settings.Default.PCB5PassedUnits.ToString();
-            //    this.lblBadDesc.Text = Properties.Settings.Default.PCB5FailedUnits.ToString();
-            //    this.lblYieldDesc.Text = String.Format("{0:0.00}%", Properties.Settings.Default.PCB5Yield);
-            //}
         }
 
         internal void SetControlPropertyValue(Control control, string property, object value)
@@ -1014,40 +798,38 @@ namespace SSR
 
         private void stateMachineTimer_Tick(object sender, EventArgs e)
         {
-            //var output = new Classes.TraceMessage();
-            //iTACController controller_arv = new iTACController(TesterId, ref output);
-            //List<Classes.Failure> failures = new List<Classes.Failure>();
-            //var measurements = new List<Classes.Measure>();
-    
-            if (IsRunning)
-            {    
-                if (!DIParo.ReadSingleSampleSingleLine())
-                {
-                    mState = (int)State.PARO;
-                }
-                
-                switch (mState)
-                {   
-                    case 0: //Inicialización de instrumentos
+            switch (state)
+            {
+                case 0: //Inicialización de instrumentos
+                    {
+                        SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
+                        SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ESPERANDO");
                         Result result = InstrumentsInstance.InitInstruments(Instrument, this);
-                        if (result.Failed)
-                            mState = (int)State.HOME;
-                        else
+                        if (!InitializingSignals())
                         {
-                            mState = (int)State.INITIALIZATION;
-                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", result.Message);
-                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
+                            state = (int)State.INITIALIZATION;
+                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "Error initializing test signals");
+                            break;
                         }
+                        if (result.Failed)
+                        {
+                            state = (int)State.INITIALIZATION;
+                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", result.Message);
+                            break;
+                        }
+                        state = (int)State.HOME;
                         break;
-
-                    case 1://Home       
+                    }
+                case 1://Home     
+                    {
                         if (DICarreraOFF.ReadSingleSampleSingleLine() && !DICarreraON.ReadSingleSampleSingleLine())
                         {
                             SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
                             DOPistonOFF.WriteSingleSampleSingleLine(true, true);
                             DOPistonON.WriteSingleSampleSingleLine(true, false);
-                            mState = (int)State.REMOVE_PIECE;
-                            //Thread.Sleep(50);
+                            state = (int)State.REMOVE_PIECE;
                         }
                         else
                         {
@@ -1055,8 +837,9 @@ namespace SSR
                             DOPistonON.WriteSingleSampleSingleLine(true, false);
                         }
                         break;
-
-                    case 2: //Retirar pieza
+                    }
+                case 2: //Retirar pieza
+                    {
                         if (!DIPieza.ReadSingleSampleSingleLine())
                         {
                             toolStripStatusSerial.Text = "";
@@ -1064,7 +847,7 @@ namespace SSR
                             SetControlPropertyValue(richTextBoxDUTTrace, "Text", "");
                             SetControlPropertyValue(labelStatusPiece, "Text", "ESPERANDO...");
                             SetControlPropertyValue(labelStatusPiece, "BackColor", TESTING);
-                            mState = (int)State.PLACE_PIECE;
+                            state = (int)State.INSERT_PIECE;
                         }
                         else
                         {
@@ -1072,356 +855,300 @@ namespace SSR
                             SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
                         }
                         break;
-
-                    case 3: //Poner pieza
+                    }
+                case 3: //Poner pieza
+                    {
                         if (!DIPieza.ReadSingleSampleSingleLine())
                         {
-                            mState = (int)State.PLACE_PIECE;
+                            state = (int)State.INSERT_PIECE;
                             SetControlPropertyValue(labelDUTSequenceStatus, "Text", "INSERTE PIEZA");
                             SetControlPropertyValue(labelStatusPiece, "Text", "ESPERANDO...");
                             SetControlPropertyValue(labelStatusPiece, "BackColor", TESTING);
                         }
                         else if (DIPieza.ReadSingleSampleSingleLine())
-                            mState = (int)State.OPTOS;
+                            state = (int)State.OPTOS;
                         break;
-
-
-                    
-                    case 5: //Escanner
+                    }
+                case 5: //Escanner
+                    {
+                        barCode = "";
+                        int i = 0;
+                        do
                         {
-                            barCode = "";
-                            //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ESCANEANDO CODIGO");
-                            int i = 0;
-                            do
-                            {
-                                InstrumentsInstance.scanner.Scan();
-                                if (!InstrumentsInstance.scanner.Response.Contains("ERROR"))
-                                    serialNumber = InstrumentsInstance.scanner.Response;
-                                i++;
-                            } while (i < 5 && serialNumber == "");
-                            if (serialNumber != "" && serialNumber.Contains("5"))
-                            {
-                                toolStripStatusSerial.Text = serialNumber;
-                                barCode = serialNumber;
-                                //scanner.Close();
-                                mState = (int)State.ITAC;
-                                break;
-                            }
-                            else
-                            {
-                                //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR EN ETIQUETA");
-                                //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                SetControlPropertyValue(labelStatusPiece, "Text", "ERROR EN ETIQUETA");
-                                SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-                                Thread.Sleep(3000);
-                                mState = (int)State.REMOVE_PIECE;
-                                break;
-                            }
-                        }
-                    case 6:
+                            InstrumentsInstance.scanner.Scan();
+                            if (!InstrumentsInstance.scanner.Response.Contains("ERROR"))
+                                serialNumber = InstrumentsInstance.scanner.Response;
+                            i++;
+                        } while (i < 5 && serialNumber == "");
+                        if (serialNumber != "" && serialNumber.Contains("5"))
                         {
-                            if (Properties.Settings.Default.iTac)
-                            {
-                                nestvalue = this.Name.Split('T');
-                                LauncherSequence = null;
-                                DOYellowLight.WriteSingleSampleSingleLine(true, false);
-                                tempString = serialNumber.Split('#');
-                                lock (MDIPrincipal.Singleton.itac)
-                                {
-                                    if (MDIPrincipal.Singleton.itac.OpenConexion(EnvironmentItac.REGISTRATION_TYPE.STATION))
-                                    {
-                                        string[] code = serialNumber.Split('#');
-                                        SerialNumberItac = code[0];
-                                        PartNumber = code[0].Substring(0, 9);
-                                        if (MDIPrincipal.Singleton.itac.CheckSerialNumberState(SerialNumberItac))
-                                        {
-                                            if (MDIPrincipal.Singleton.itac.CheckHistoryFromModule(SerialNumberItac, Variable["StationNumberBefore"].value, Variable["StationNumber"].value))
-                                            {
-                                                statusItac = 1;
-                                                mState = (int)State.PISTON_ON;
-                                            }
-                                            else
-                                            {
-                                                SetControlPropertyValue(richTextBoxDUTTrace, "Text", "ERROR: " + MDIPrincipal.Singleton.itac.MessageItac);
-                                                Application.DoEvents();
-                                                mState = (int)State.HOME;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            SetControlPropertyValue(richTextBoxDUTTrace, "Text", "NO SE PUEDE PROBAR");
-                                            mState = (int)State.HOME;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR ITAC");
-                                        //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                        SetControlPropertyValue(labelStatusPiece, "Text", "ERROR ITAC");
-                                        SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-                                        Thread.Sleep(2000);
-                                        mState = (int)State.HOME;
-                                    }
-                                    MDIPrincipal.Singleton.itac.CloseConexion();
-                                }
-                            }
-                            else
-                            {
-                                statusItac = 1;
-                                mState = (int)State.PISTON_ON;
-                            }
+                            toolStripStatusSerial.Text = serialNumber;
+                            barCode = serialNumber;
+                            state = (int)State.ITAC;
                             break;
                         }
-                    case 7: //Optos
+                        else
                         {
-                            if (!DIPieza.ReadSingleSampleSingleLine())
-                            {
-                                mState = (int)State.PLACE_PIECE;
-                                break;
-                            }
-                            if (!DIOptos.ReadSingleSampleSingleLine())
-                            {
-                                SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PRESIONE OPTOS CONTINUAMENTE");
-                                mState = (int)State.OPTOS;
-                                break;
-                            }
-                            else
-                            {
-                                if (statusItac == 0)
-                                    mState = (int)State.SCAN;
-                                else
-                                    mState = (int)State.PISTON_ON;
-                                break;
-                            }
-                        }
-                    case 8: //Piston ON
-                        {
-                            if (DIOptos.ReadSingleSampleSingleLine())
-                            {
-                                if (DICarreraOFF.ReadSingleSampleSingleLine() && !DICarreraON.ReadSingleSampleSingleLine())
-                                {
-                                    DOPistonON.WriteSingleSampleSingleLine(true, true);
-                                    DOPistonOFF.WriteSingleSampleSingleLine(true, false);
-                                    break;
-                                }
-                                else if (!DICarreraOFF.ReadSingleSampleSingleLine() && !DICarreraON.ReadSingleSampleSingleLine())
-                                    break;
-                                else
-                                {
-                                    
-                                    mState = (int)State.TEST;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                DOPistonON.WriteSingleSampleSingleLine(true, false);
-                                DOPistonOFF.WriteSingleSampleSingleLine(true, true);
-                                mState = (int)State.OPTOS;
-                                break;
-                            }
-                        }
-                    case 9: //Test
-                        {
-                            DOGreenLight.WriteSingleSampleSingleLine(true, false);
-                            DORedLight.WriteSingleSampleSingleLine(true, false);
-                            DOYellowLight.WriteSingleSampleSingleLine(true, true);
-                            //Thread.Sleep(1000);
-                            Thread.SpinWait(100);
-                            //DOPistonON.WriteSingleSampleSingleLine(true, true);
-                            //tempString = serialNumber.Split('#');
-                            //var interlock = controller_arv.Interlocking(tempString[0], ref output);
-                            //if (interlock == Enums.SerialState.PASS)
-                            //{
-                                if (DICarreraON.ReadSingleSampleSingleLine() && !DICarreraOFF.ReadSingleSampleSingleLine())
-                                {
-                                    //LauncherSequence.Start();
-                                    LauncherSequence = new Thread(new ThreadStart(StartSequence));
-                                    LauncherSequence.Name = this.Name + " Sequence";
-                                    Thread.Sleep(80);
-                                    LauncherSequence.Start();
-                                    Debug.WriteLine(LauncherSequence.ThreadState.ToString());
-                                    //StartSequence();
-                                    //Application.DoEvents();
-                                    mState = (int)State.WAITING;
-                                }
-                                else
-                                {
-                                    //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR AL INICIAR SECUENCIA");
-                                    //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                    SetControlPropertyValue(labelStatusPiece, "Text", "ERROR AL INICIAR SECUENCIA");
-                                    SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-                                    mState = (int)State.HOME;
-                                }
-                            //}
-                            //else
-                            //{
-                            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "VERIFICAR SERIAL EN ITAC");
-                            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                            //    mState = (int)estado.HOME;
-                            //}
+                            SetControlPropertyValue(labelStatusPiece, "Text", "ERROR EN ETIQUETA");
+                            SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+                            Thread.Sleep(3000);
+                            state = (int)State.REMOVE_PIECE;
                             break;
                         }
-                    case 10://VACIO
+                    }
+                case 6:
+                    {
+                        if (Properties.Settings.Default.iTac)
                         {
-                            if (isComplete == 1)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                mState = (int)State.RESULTS;
-                            }
-                            //DOStart.WriteSingleSampleSingleLine(true, false);
-                            
-                        }
-                        break;
-
-                    case 11: //Resultados
-                        {
-
-                            DOReset.WriteSingleSampleSingleLine(true, true);
-                            Thread.Sleep(50);
-                            DOReset.WriteSingleSampleSingleLine(true, false);
+                            nestvalue = this.Name.Split('T');
                             LauncherSequence = null;
-                            isComplete = 0;
-                            statusItac = 0;
-                            InstrumentsInstance.ResetInstruments();
-                            if (Properties.Settings.Default.iTac)
+                            DOYellowLight.WriteSingleSampleSingleLine(true, false);
+                            tempString = serialNumber.Split('#');
+                            lock (MDIPrincipal.Singleton.itac)
                             {
-                                lock (MDIPrincipal.Singleton.itac)
+                                if (MDIPrincipal.Singleton.itac.OpenConexion(EnvironmentItac.REGISTRATION_TYPE.STATION))
                                 {
-                                    if (MDIPrincipal.Singleton.itac.OpenConexion(EnvironmentItac.REGISTRATION_TYPE.STATION))
+                                    string[] code = serialNumber.Split('#');
+                                    SerialNumberItac = code[0];
+                                    PartNumber = code[0].Substring(0, 9);
+                                    if (MDIPrincipal.Singleton.itac.CheckSerialNumberState(SerialNumberItac))
                                     {
-                                        if (error)
+                                        if (MDIPrincipal.Singleton.itac.CheckHistoryFromModule(SerialNumberItac, Variable["StationNumberBefore"].value, Variable["StationNumber"].value))
                                         {
-                                            DOGreenLight.WriteSingleSampleSingleLine(true, false);
-                                            DORedLight.WriteSingleSampleSingleLine(true, true);
-                                            DOYellowLight.WriteSingleSampleSingleLine(true, false);
-                                            //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "FALLÓ");
-                                            //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                            SetControlPropertyValue(labelStatusPiece, "Text", "FALLÓ");
-                                            SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-                                            //if (MDIPrincipal.Singleton.itac.UploadState(PartNumber, SerialNumberItac, 1, cycleTime))
-                                            //{
-                                            //if (MDIPrincipal.Singleton.itac.UploadFailureAndResultData(PartNumber, 1, cycleTime, SerialNumberItac, "NEST", nestvalue.ToString(), 0, "", failName, fileToFaultNote, ""))
-                                            //{
-                                            //mState = (int)estado.HOME;
-                                            //}
-                                            //else
-                                            //{
-                                            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR EN ITAC");
-                                            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                            //    Thread.Sleep(2000);
-                                            //    mState = (int)estado.HOME;
-                                            //}
-                                            //}
-                                            //else
-                                            //{
-                                            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR EN ITAC");
-                                            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                            Thread.Sleep(2000);
-                                            mState = (int)State.HOME;
-                                            //}
+                                            statusItac = 1;
+                                            state = (int)State.PISTON_ON;
                                         }
                                         else
                                         {
-                                            DOGreenLight.WriteSingleSampleSingleLine(true, true);
-                                            DORedLight.WriteSingleSampleSingleLine(true, false);
-                                            DOYellowLight.WriteSingleSampleSingleLine(true, false);
-                                            //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PASÓ");
-                                            //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", PASSED);
-                                            SetControlPropertyValue(labelStatusPiece, "Text", "PASÓ");
-                                            SetControlPropertyValue(labelStatusPiece, "BackColor", PASSED);
-                                            if (MDIPrincipal.Singleton.itac.UploadState(PartNumber, SerialNumberItac, 0, cycleTime))
-                                            {
-                                                mState = (int)State.HOME;
-                                            }
-                                            else
-                                            {
-                                                //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR EN ITAC");
-                                                //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                                SetControlPropertyValue(labelStatusPiece, "Text", "ERROR RN ITAC");
-                                                SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-                                                mState = (int)State.HOME;
-                                            }
+                                            SetControlPropertyValue(richTextBoxDUTTrace, "Text", "ERROR: " + MDIPrincipal.Singleton.itac.MessageItac);
+                                            Application.DoEvents();
+                                            state = (int)State.HOME;
                                         }
                                     }
                                     else
                                     {
-                                        //SetControlPropertyValue(labelDUTSequenceStatus, "Text", "ERROR ITAC");
-                                        //SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                                        SetControlPropertyValue(labelStatusPiece, "Text", "ERROR EN ITAC");
-                                        SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-
+                                        SetControlPropertyValue(richTextBoxDUTTrace, "Text", "NO SE PUEDE PROBAR");
+                                        state = (int)State.HOME;
                                     }
-                                    MDIPrincipal.Singleton.itac.CloseConexion();
-                                }
-                            }
-                            else
-                            {
-                                if (error)
-                                {
-                                    DOGreenLight.WriteSingleSampleSingleLine(true, false);
-                                    DORedLight.WriteSingleSampleSingleLine(true, true);
-                                    DOYellowLight.WriteSingleSampleSingleLine(true, false);
-                                    SetControlPropertyValue(labelStatusPiece, "Text", "FALLÓ");
-                                    SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
-                                    mState = (int)State.HOME;
                                 }
                                 else
                                 {
-                                    DOGreenLight.WriteSingleSampleSingleLine(true, true);
-                                    DORedLight.WriteSingleSampleSingleLine(true, false);
-                                    DOYellowLight.WriteSingleSampleSingleLine(true, false);
-                                    SetControlPropertyValue(labelStatusPiece, "Text", "PASÓ");
-                                    SetControlPropertyValue(labelStatusPiece, "BackColor", PASSED);
-                                    mState = (int)State.HOME;
+                                    SetControlPropertyValue(labelStatusPiece, "Text", "ERROR ITAC");
+                                    SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+                                    Thread.Sleep(2000);
+                                    state = (int)State.HOME;
                                 }
+                                MDIPrincipal.Singleton.itac.CloseConexion();
                             }
+                        }
+                        else
+                        {
+                            statusItac = 1;
+                            state = (int)State.PISTON_ON;
+                        }
+                        break;
+                    }
+                case 7: //Optos
+                    {
+                        if (!DIPieza.ReadSingleSampleSingleLine())
+                        {
+                            state = (int)State.INSERT_PIECE;
                             break;
                         }
-                    
-
-                    case 12: //Paro de emergencia
+                        if (!DIOptos.ReadSingleSampleSingleLine())
                         {
-                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PARO DE EMERGENCIA");
-                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PRESIONE OPTOS CONTINUAMENTE");
+                            state = (int)State.OPTOS;
+                            break;
+                        }
+                        else
+                        {
+                            if (statusItac == 0)
+                                state = (int)State.SCAN;
+                            else
+                                state = (int)State.PISTON_ON;
+                            break;
+                        }
+                    }
+                case 8: //Piston ON
+                    {
+                        if (DIOptos.ReadSingleSampleSingleLine())
+                        {
+                            if (DICarreraOFF.ReadSingleSampleSingleLine() && !DICarreraON.ReadSingleSampleSingleLine())
+                            {
+                                DOPistonON.WriteSingleSampleSingleLine(true, true);
+                                DOPistonOFF.WriteSingleSampleSingleLine(true, false);
+                                break;
+                            }
+                            else if (!DICarreraOFF.ReadSingleSampleSingleLine() && !DICarreraON.ReadSingleSampleSingleLine())
+                                break;
+                            else
+                            {
+
+                                state = (int)State.TEST;
+                                break;
+                            }
+                        }
+                        else
+                        {
                             DOPistonON.WriteSingleSampleSingleLine(true, false);
                             DOPistonOFF.WriteSingleSampleSingleLine(true, true);
-                            //string name = Paro.DIChannels.All.VirtualName;
-                            //if (name == "DIO1/Port1/Line2" && this.Name == "NEST1")
-                            //{
-                            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PARO DE EMERGENCIA");
-                            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                            //    if (this.Name == "NEST1" && name == "DIO1/Port0/Line2")
-                            //    {
-                            //        LauncherSequence = null;
-                            //        mState = 0;
-                            //    }
-                            //    InstrumentsInstance.CloseInstruments();
-                            //    mState = 0;
-                            //}
-                            mState = (int)State.HOME;
+                            state = (int)State.OPTOS;
                             break;
                         }
-                }
+                    }
+                case 9: //Test
+                    {
+                        DOGreenLight.WriteSingleSampleSingleLine(true, false);
+                        DORedLight.WriteSingleSampleSingleLine(true, false);
+                        DOYellowLight.WriteSingleSampleSingleLine(true, true);
+                        Thread.SpinWait(100);
+                        if (DICarreraON.ReadSingleSampleSingleLine() && !DICarreraOFF.ReadSingleSampleSingleLine())
+                        {
+                            IsRunning = true;
+                            LauncherSequence = new Thread(new ThreadStart(StartSequence));
+                            LauncherSequence.Name = this.Name + " Sequence";
+                            Thread.Sleep(80);
+                            LauncherSequence.Start();
+                            Debug.WriteLine(LauncherSequence.ThreadState.ToString());
+                            state = (int)State.WAITING;
+                        }
+                        else
+                        {
+                            SetControlPropertyValue(labelStatusPiece, "Text", "ERROR AL INICIAR SECUENCIA");
+                            SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+                            state = (int)State.HOME;
+                        }
+                        break;
+                    }
+                case 10://VACIO
+                    {
+                        if (isComplete == 1)
+                            break;
+                        else
+                            state = (int)State.RESULTS;
+                        break;
+                    }
+                case 11: //Resultados
+                    {
 
+                        DOReset.WriteSingleSampleSingleLine(true, true);
+                        Thread.Sleep(50);
+                        DOReset.WriteSingleSampleSingleLine(true, false);
+                        LauncherSequence = null;
+                        isComplete = 0;
+                        statusItac = 0;
+                        InstrumentsInstance.ResetInstruments();
+                        if (Properties.Settings.Default.iTac)
+                        {
+                            lock (MDIPrincipal.Singleton.itac)
+                            {
+                                if (MDIPrincipal.Singleton.itac.OpenConexion(EnvironmentItac.REGISTRATION_TYPE.STATION))
+                                {
+                                    if (error)
+                                    {
+                                        DOGreenLight.WriteSingleSampleSingleLine(true, false);
+                                        DORedLight.WriteSingleSampleSingleLine(true, true);
+                                        DOYellowLight.WriteSingleSampleSingleLine(true, false);
+                                        SetControlPropertyValue(labelStatusPiece, "Text", "FALLÓ");
+                                        SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+                                        Thread.Sleep(2000);
+                                        state = (int)State.HOME;
+                                    }
+                                    else
+                                    {
+                                        DOGreenLight.WriteSingleSampleSingleLine(true, true);
+                                        DORedLight.WriteSingleSampleSingleLine(true, false);
+                                        DOYellowLight.WriteSingleSampleSingleLine(true, false);
+                                        SetControlPropertyValue(labelStatusPiece, "Text", "PASÓ");
+                                        SetControlPropertyValue(labelStatusPiece, "BackColor", PASSED);
+                                        if (MDIPrincipal.Singleton.itac.UploadState(PartNumber, SerialNumberItac, 0, cycleTime))
+                                        {
+                                            state = (int)State.HOME;
+                                        }
+                                        else
+                                        {
+                                            SetControlPropertyValue(labelStatusPiece, "Text", "ERROR RN ITAC");
+                                            SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+                                            state = (int)State.HOME;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    SetControlPropertyValue(labelStatusPiece, "Text", "ERROR EN ITAC");
+                                    SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+
+                                }
+                                MDIPrincipal.Singleton.itac.CloseConexion();
+                            }
+                        }
+                        else
+                        {
+                            if (error)
+                            {
+                                DOGreenLight.WriteSingleSampleSingleLine(true, false);
+                                DORedLight.WriteSingleSampleSingleLine(true, true);
+                                DOYellowLight.WriteSingleSampleSingleLine(true, false);
+                                SetControlPropertyValue(labelStatusPiece, "Text", "FALLÓ");
+                                SetControlPropertyValue(labelStatusPiece, "BackColor", FAILED);
+                                state = (int)State.HOME;
+                            }
+                            else
+                            {
+                                DOGreenLight.WriteSingleSampleSingleLine(true, true);
+                                DORedLight.WriteSingleSampleSingleLine(true, false);
+                                DOYellowLight.WriteSingleSampleSingleLine(true, false);
+                                SetControlPropertyValue(labelStatusPiece, "Text", "PASÓ");
+                                SetControlPropertyValue(labelStatusPiece, "BackColor", PASSED);
+                                state = (int)State.HOME;
+                            }
+                        }
+                        break;
+                    }
+                case 12: //Paro de emergencia
+                    {
+                        IsRunning = false;
+                        if (!LauncherSequence.Join(15000))
+                        {
+                            LauncherSequence.Abort();
+                            LauncherSequence = null;
+                        }
+                        SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PARO DE EMERGENCIA");
+                        SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                        DOPistonON.WriteSingleSampleSingleLine(true, false);
+                        DOPistonOFF.WriteSingleSampleSingleLine(true, true);
+                        state = (int)State.HOME;
+                        break;
+                    }
+                case 13:
+                    {
+                        Console.WriteLine($"Cerrando Form {Name}");
+                        stateMachineTimer.Enabled = false;
+                        Signal.Clear();
+                        Test.Clear();
+                        Variable.Clear();
+                        SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
+                        SetControlPropertyValue(labelDUTSequenceStatus, "Text", "DETENIDO");
+                        IsTerminated = true;
+                        InstrumentsInstance.CloseInstruments();
+                        break;
+                    }
             }
-            else
-            {
-                Console.WriteLine($"Cerrando Form {Name}");
-                Thread.Sleep(200);
-                stateMachineTimer.Enabled = false;
-                Signal.Clear();
-                Test.Clear();
-                Variable.Clear();
-                SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
-                SetControlPropertyValue(labelDUTSequenceStatus, "Text", "DETENIDO");
-                IsTerminated = true;
-                InstrumentsInstance.CloseInstruments();
-                //matar hilo y esperarlo
-            }
+            //else
+            //{
+            //    Console.WriteLine($"Cerrando Form {Name}");
+            //    Thread.Sleep(200);
+            //    stateMachineTimer.Enabled = false;
+            //    Signal.Clear();
+            //    Test.Clear();
+            //    Variable.Clear();
+            //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", WAITING);
+            //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", "DETENIDO");
+            //    IsTerminated = true;
+            //    InstrumentsInstance.CloseInstruments();
+            //    //matar hilo y esperarlo
+            //}
         }
 
         private void ClearListView()
@@ -1560,102 +1287,6 @@ namespace SSR
 
         private void chkStatus_CheckedChanged(object sender, EventArgs e)
         {
-            //if (this.Text.Contains("PCB1"))
-            //{
-            //    Properties.Settings.Default.PCBStatus = chkStatus.Checked;
-            //    SetControlsStatus(this, chkStatus.Checked);
-                //foreach (Form f in MDIPrincipal.Singleton.MdiChildren)
-                //{
-                //    if (f.Name == "Flasher2")
-                //    {
-                //        if (f is TestForm)
-                //        {
-                //            if (this.chkStatus.Checked && ((TestForm)f).chkStatus.Checked)
-                //            {
-                //                ((TestForm)f).chkStatus.Checked = false;
-                //                SetControlsStatus((TestForm)f, false);
-                //            }
-                //        }
-                //    }
-                //}
-            //}
-            //if (this.Text.Contains("PCB2"))
-            //{
-            //    Properties.Settings.Default.PCB2Status = chkStatus.Checked;
-            //    SetControlsStatus(this, chkStatus.Checked);
-                //foreach (Form f in MDIPrincipal.Singleton.MdiChildren)
-                //{
-                //    if (f.Name == "Flasher1")
-                //    {
-                //        if (f is TestForm)
-                //        {
-                //            if (this.chkStatus.Checked && ((TestForm)f).chkStatus.Checked)
-                //            {
-                //                ((TestForm)f).chkStatus.Checked = false;
-                //                SetControlsStatus((TestForm)f, false);
-                //            }
-                //        }
-                //    }
-                //}
-            //}
-            //if (this.Text.Contains("PCB3"))
-            //{
-            //    Properties.Settings.Default.PCB3Status = chkStatus.Checked;
-            //    SetControlsStatus(this, chkStatus.Checked);
-                //foreach (Form f in MDIPrincipal.Singleton.MdiChildren)
-                //{
-                //    if (f.Name == "Flasher1")
-                //    {
-                //        if (f is TestForm)
-                //        {
-                //            if (this.chkStatus.Checked && ((TestForm)f).chkStatus.Checked)
-                //            {
-                //                ((TestForm)f).chkStatus.Checked = false;
-                //                SetControlsStatus((TestForm)f, false);
-                //            }
-                //        }
-                //    }
-                //}
-            //}
-            //if (this.Text.Contains("PCB4"))
-            //{
-            //    Properties.Settings.Default.PCB4Status = chkStatus.Checked;
-            //    SetControlsStatus(this, chkStatus.Checked);
-                //foreach (Form f in MDIPrincipal.Singleton.MdiChildren)
-                //{
-                //    if (f.Name == "Flasher1")
-                //    {
-                //        if (f is TestForm)
-                //        {
-                //            if (this.chkStatus.Checked && ((TestForm)f).chkStatus.Checked)
-                //            {
-                //                ((TestForm)f).chkStatus.Checked = false;
-                //                SetControlsStatus((TestForm)f, false);
-                //            }
-                //        }
-                //    }
-                //}
-            //}
-            //if (this.Text.Contains("PCB5"))
-            //{
-            //    Properties.Settings.Default.PCB5Status = chkStatus.Checked;
-            //    SetControlsStatus(this, chkStatus.Checked);
-                //foreach (Form f in MDIPrincipal.Singleton.MdiChildren)
-                //{
-                //    if (f.Name == "Flasher1")
-                //    {
-                //        if (f is TestForm)
-                //        {
-                //            if (this.chkStatus.Checked && ((TestForm)f).chkStatus.Checked)
-                //            {
-                //                ((TestForm)f).chkStatus.Checked = false;
-                //                SetControlsStatus((TestForm)f, false);
-                //            }
-                //        }
-                //    }
-                //}
-            //}
-            //Properties.Settings.Default.Save();
         }
 
         private void SetControlsStatus(TestForm form, bool status)

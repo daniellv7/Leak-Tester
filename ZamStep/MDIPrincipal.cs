@@ -22,6 +22,8 @@ namespace SSR
     {
         private static MDIPrincipal singleton = null;
         private static readonly object padlock = new object();
+        private int state = 0;
+
         public static MDIPrincipal Singleton
         {
             get
@@ -55,14 +57,12 @@ namespace SSR
         private string[] nestInfo;
         private string[] variants;
         internal string selectedVariant = string.Empty;
-        private const int ResultItem = 2;
         public string activeUser;
 
         internal int mState = 0;
         public Dictionary<string, InstrParam> Instrument = new Dictionary<string, InstrParam>();
         internal TestForm instanceForm = new TestForm();
         internal string serialNumber = string.Empty;
-        //internal Sequence sequence = new Sequence();
         internal ZamStep.SetDigitalOutput setDigitalOutput = new ZamStep.SetDigitalOutput();
         internal ZamStep.ReadDigitalInput readDigitalInput = new ZamStep.ReadDigitalInput();
         internal delegate void SetControlPropertyThreadSafe(Control control, string property, object propertyValue);
@@ -139,7 +139,7 @@ namespace SSR
             int xPos = 0;
             int counterForms = nestInfo.Length; //invertir contador para sentido de forms
             int countBack = 0;
-            foreach (Control c in this.Controls)//Para obtener el tamaño delárea de trabajo
+            foreach (Control c in Controls)//Para obtener el tamaño delárea de trabajo
             {
                 if (c is MdiClient)
                     s = c.Size;
@@ -253,10 +253,6 @@ namespace SSR
 
         private void dUT1ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //NestConfiguration Nest1 = new NestConfiguration();
-            //Nest1.MdiParent = this;
-            //Nest1.nestConfig = NestConfiguration.Nest.NEST1;
-            //Nest1.Show();
             foreach (Form f in Application.OpenForms)
             {
                 if (selectedVariant != "")
@@ -278,10 +274,6 @@ namespace SSR
 
         private void dUT2ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //NestConfiguration Nest2 = new NestConfiguration();
-            //Nest2.MdiParent = this;
-            //Nest2.nestConfig = NestConfiguration.Nest.NEST2;
-            //Nest2.Show();
             foreach (Form f in Application.OpenForms)
             {
                 if (selectedVariant != "")
@@ -309,58 +301,31 @@ namespace SSR
 
         private void toolStripButtonPlay_Click(object sender, EventArgs e)
         {
-           
             if (selectedVariant != "")
-            {
-                //XMLUtils.Singleton.LoadInstrumentsToDictionary();
-                SetControlsStateWhenRunning();
-                InitStateMachines();
-            }
+                StateMachine.Enabled = true;
             else
                 MessageBox.Show("Seleccione una variante", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void InitStateMachines()
+        private void InitChildrenStateMachine()
         {
             toolStripLabelResult.Text = "NIDOS EN EJECUCIÓN...";
-            foreach (TestForm children in MdiChildren)
+            foreach (Form child in Application.OpenForms)
             {
-                if (children is TestForm)
-                {
-                    ((TestForm)children).SetControlPropertyValue(((TestForm)children).labelDUTSequenceStatus, "BackColor", ((TestForm)children).WAITING);
-                    ((TestForm)children).SetControlPropertyValue(((TestForm)children).labelDUTSequenceStatus, "Text", "ESPERANDO");
-                    children.mState = 0;
-                    if (!children.IsRunning)
-                    {
-                        children.IsRunning = true;
-                        children.stateMachineTimer.Enabled = true;
-                    }
-                }
+                if (child is TestForm)
+                    ((TestForm)child).stateMachineTimer.Enabled = true;
             }
-            //for (int i = 0; i < threads.Count; i++)
-            //{
-            //    if (threads[i].threadNest == null)
-            //        //Debug.WriteLine(i + "nulo");
-            //        if (threads[i].isActive)  
-            //        {
-            //            TestForm f = (TestForm)Application.OpenForms[nestInfo[i].ToString()];
-            //            Thread t = new Thread(new ThreadStart(f.Show));
-            //            t.Name = "T" + i;
-            //            ThreadNest aux = threads[i];//hacer una copia del objeto ThreadNest para modificar la referencia del hilo (Thread)
-            //            aux.threadNest = t;//reasignar el objeto threadNest al hilo creado aqui (t)
-            //            threads[i] = aux;//reasignar el objeto [i] del array con aux
-            //                             //Debug.WriteLine(i + threads[i].threadNest.ThreadState.ToString());
-            //            threads[i].threadNest.Start();
-            //            //threads[i].threadNest.Join();
-            //            //Debug.WriteLine(i + threads[i].threadNest.ThreadState.ToString());
-            //            pState = (int)STATE_APPLICATION_OF_FORMS.RUNNING;
-
-
-            //        }
-            //if (threads[i].threadNest != null)
-            //    Debug.WriteLine(i + threads[i].threadNest.ThreadState.ToString());
-            //}
         }
+
+        private void StopChildrenStateMachine()
+        {
+            foreach (Form child in Application.OpenForms)
+            {
+                if (child is TestForm)
+                    ((TestForm)child).state = 12;
+            }
+        }
+
         internal void LoadCounters()
         {
             toolStripStatusLabelTestedUnits.Text = Properties.Settings.Default.PCBTestedUnits.ToString();
@@ -384,19 +349,12 @@ namespace SSR
 
         private void toolStripButtonStop_Click(object sender, EventArgs e)
         {
-            this.Cursor = Cursors.WaitCursor;
+            Cursor = Cursors.WaitCursor;
             toolStripLabelResult.Text = "DETENIENDO PROCESOS, ESPERE...";
-            foreach (TestForm children in MdiChildren)
-            {
-                if (children is TestForm)
-                {
-                    if (children.IsRunning)
-                        children.IsRunning = false;
-                }
-            }
+            state = 5;
             SetControlsStateWhenStopped();
             toolStripLabelResult.Text = "DETENIDO";
-            this.Cursor = Cursors.Default;
+            Cursor = Cursors.Default;
         }
 
         private void closeAllWindowsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -409,9 +367,7 @@ namespace SSR
 
         private void MDIPrincipal_FormClosing(object sender, FormClosingEventArgs e)
         {
-            //foreach (KeyValuePair<string, Thread> thread in Threads)
-            //    thread.Value.Abort();
-            foreach (Form children in this.MdiChildren)
+            foreach (Form children in MdiChildren)
             {
                 if (children is TestForm)
                     children.Close();
@@ -529,6 +485,50 @@ namespace SSR
                 {
                     MessageBox.Show("Seleccione una variante", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        private void StateMachineTimer_Tick(object sender, EventArgs e)
+        {
+            using (Task ESTOP = DaqSystem.Local.LoadTask("SENS_ESTOP"))
+            {
+                DigitalSingleChannelReader dscr = new DigitalSingleChannelReader(ESTOP.Stream);
+                if (dscr.ReadSingleSampleSingleLine())
+                    state = 100;
+            }
+
+            switch (state)
+            {
+                case 0:
+                    {
+                        SetControlsStateWhenRunning();
+                        InitChildrenStateMachine();
+                        state = 1;
+                        break;
+                    }
+                case 1://Idle
+                    {
+                        Thread.Sleep(0);
+                        break;
+                    }
+                case 5://Stop button
+                    {
+                        foreach (Form f in Application.OpenForms)
+                        {
+                            if (f is TestForm)
+                                ((TestForm)f).state = 13;
+                        }
+                        break;
+                    }
+                case 100://ESTOP button
+                    {
+                        foreach (Form f in Application.OpenForms)
+                        {
+                            if (f is TestForm)
+                                ((TestForm)f).state = 12;
+                        }
+                        break;
+                    }
             }
         }
     }

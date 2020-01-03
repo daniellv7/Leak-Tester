@@ -36,6 +36,7 @@
             this.editMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.dUT1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dUT2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dut3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.toolBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -80,7 +81,7 @@
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.helpProvider1 = new System.Windows.Forms.HelpProvider();
-            this.dut3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.StateMachine = new System.Windows.Forms.Timer(this.components);
             this.menuStrip.SuspendLayout();
             this.toolStripPrincipal.SuspendLayout();
             this.statusStripPrincipal.SuspendLayout();
@@ -145,6 +146,13 @@
             this.dUT2ToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.dUT2ToolStripMenuItem.Text = "Nest 2 Configuration";
             this.dUT2ToolStripMenuItem.Click += new System.EventHandler(this.dUT2ToolStripMenuItem_Click);
+            // 
+            // dut3ToolStripMenuItem
+            // 
+            this.dut3ToolStripMenuItem.Name = "dut3ToolStripMenuItem";
+            this.dut3ToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.dut3ToolStripMenuItem.Text = "Nest 3 Configuration";
+            this.dut3ToolStripMenuItem.Click += new System.EventHandler(this.dut3ToolStripMenuItem_Click);
             // 
             // viewMenu
             // 
@@ -351,8 +359,8 @@
             // 
             this.toolStripLabelMessage.Font = new System.Drawing.Font("Calibri", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStripLabelMessage.Name = "toolStripLabelMessage";
-            this.toolStripLabelMessage.Size = new System.Drawing.Size(81, 39);
-            this.toolStripLabelMessage.Text = "Mensaje:";
+            this.toolStripLabelMessage.Size = new System.Drawing.Size(83, 39);
+            this.toolStripLabelMessage.Text = "Message:";
             this.toolStripLabelMessage.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // toolStripLabelResult
@@ -490,12 +498,9 @@
             this.fileSystemWatcher.EnableRaisingEvents = true;
             this.fileSystemWatcher.SynchronizingObject = this;
             // 
-            // dut3ToolStripMenuItem
+            // StateMachine
             // 
-            this.dut3ToolStripMenuItem.Name = "dut3ToolStripMenuItem";
-            this.dut3ToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
-            this.dut3ToolStripMenuItem.Text = "Nest 3 Configuration";
-            this.dut3ToolStripMenuItem.Click += new System.EventHandler(this.dut3ToolStripMenuItem_Click);
+            this.StateMachine.Tick += new System.EventHandler(this.StateMachineTimer_Tick);
             // 
             // MDIPrincipal
             // 
@@ -580,6 +585,7 @@
         private System.Windows.Forms.ToolStripMenuItem tasksManagerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem diagnosticPanelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dut3ToolStripMenuItem;
+        private System.Windows.Forms.Timer StateMachine;
     }
 }
 

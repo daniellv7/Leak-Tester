@@ -73,14 +73,16 @@
             this.toolStripButtonSaveSignals = new System.Windows.Forms.ToolStripButton();
             this.tabPageInstruments = new System.Windows.Forms.TabPage();
             this.dataGridViewDevices = new System.Windows.Forms.DataGridView();
-            this.toolStripInstruments = new System.Windows.Forms.ToolStrip();
-            this.toolStripButtonAddInstrument = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButtonRemoveInstrument = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButtonSaveInstruments = new System.Windows.Forms.ToolStripButton();
             this.ColInstrName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColInstrPort = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColInstrAttributes = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColInstrAssembly = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.toolStripInstruments = new System.Windows.Forms.ToolStrip();
+            this.toolStripButtonAddInstrument = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonRemoveInstrument = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonSaveInstruments = new System.Windows.Forms.ToolStripButton();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControlDUTConfiguration.SuspendLayout();
             this.tabPageTests.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTests)).BeginInit();
@@ -94,6 +96,7 @@
             this.tabPageInstruments.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDevices)).BeginInit();
             this.toolStripInstruments.SuspendLayout();
+            this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlDUTConfiguration
@@ -102,11 +105,12 @@
             this.tabControlDUTConfiguration.Controls.Add(this.tabPageVariables);
             this.tabControlDUTConfiguration.Controls.Add(this.tabPageSignals);
             this.tabControlDUTConfiguration.Controls.Add(this.tabPageInstruments);
+            this.tabControlDUTConfiguration.Controls.Add(this.tabPage1);
             this.tabControlDUTConfiguration.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlDUTConfiguration.Location = new System.Drawing.Point(0, 0);
             this.tabControlDUTConfiguration.Name = "tabControlDUTConfiguration";
             this.tabControlDUTConfiguration.SelectedIndex = 0;
-            this.tabControlDUTConfiguration.Size = new System.Drawing.Size(1243, 212);
+            this.tabControlDUTConfiguration.Size = new System.Drawing.Size(1243, 505);
             this.tabControlDUTConfiguration.TabIndex = 0;
             // 
             // tabPageTests
@@ -116,7 +120,7 @@
             this.tabPageTests.Location = new System.Drawing.Point(4, 23);
             this.tabPageTests.Name = "tabPageTests";
             this.tabPageTests.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageTests.Size = new System.Drawing.Size(1235, 185);
+            this.tabPageTests.Size = new System.Drawing.Size(1235, 478);
             this.tabPageTests.TabIndex = 0;
             this.tabPageTests.Text = "Tests";
             this.tabPageTests.UseVisualStyleBackColor = true;
@@ -160,7 +164,7 @@
             this.dataGridViewTests.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewTests.ShowCellErrors = false;
             this.dataGridViewTests.ShowRowErrors = false;
-            this.dataGridViewTests.Size = new System.Drawing.Size(1229, 148);
+            this.dataGridViewTests.Size = new System.Drawing.Size(1229, 441);
             this.dataGridViewTests.TabIndex = 3;
             this.dataGridViewTests.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewTests_DragDrop);
             this.dataGridViewTests.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewTests_DragEnter);
@@ -661,6 +665,38 @@
             this.dataGridViewDevices.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewDevices_DragEnter);
             this.dataGridViewDevices.MouseMove += new System.Windows.Forms.MouseEventHandler(this.dataGridViewDevices_MouseMove);
             // 
+            // ColInstrName
+            // 
+            this.ColInstrName.HeaderText = "Name";
+            this.ColInstrName.Name = "ColInstrName";
+            this.ColInstrName.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColInstrName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColInstrName.Width = 150;
+            // 
+            // ColInstrPort
+            // 
+            this.ColInstrPort.HeaderText = "Port";
+            this.ColInstrPort.Name = "ColInstrPort";
+            this.ColInstrPort.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColInstrPort.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // ColInstrAttributes
+            // 
+            this.ColInstrAttributes.HeaderText = "Attributes";
+            this.ColInstrAttributes.Name = "ColInstrAttributes";
+            this.ColInstrAttributes.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColInstrAttributes.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColInstrAttributes.Width = 400;
+            // 
+            // ColInstrAssembly
+            // 
+            this.ColInstrAssembly.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.ColInstrAssembly.FillWeight = 250F;
+            this.ColInstrAssembly.HeaderText = "Assembly";
+            this.ColInstrAssembly.Name = "ColInstrAssembly";
+            this.ColInstrAssembly.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.ColInstrAssembly.Width = 200;
+            // 
             // toolStripInstruments
             // 
             this.toolStripInstruments.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -710,44 +746,37 @@
             this.toolStripButtonSaveInstruments.Text = "Save Instruments";
             this.toolStripButtonSaveInstruments.Click += new System.EventHandler(this.toolStripButtonSaveInstruments_Click);
             // 
-            // ColInstrName
+            // tabPage1
             // 
-            this.ColInstrName.HeaderText = "Name";
-            this.ColInstrName.Name = "ColInstrName";
-            this.ColInstrName.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColInstrName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ColInstrName.Width = 150;
+            this.tabPage1.Controls.Add(this.tableLayoutPanel1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 23);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1235, 478);
+            this.tabPage1.TabIndex = 4;
+            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // ColInstrPort
+            // tableLayoutPanel1
             // 
-            this.ColInstrPort.HeaderText = "Port";
-            this.ColInstrPort.Name = "ColInstrPort";
-            this.ColInstrPort.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColInstrPort.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // ColInstrAttributes
-            // 
-            this.ColInstrAttributes.HeaderText = "Attributes";
-            this.ColInstrAttributes.Name = "ColInstrAttributes";
-            this.ColInstrAttributes.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColInstrAttributes.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ColInstrAttributes.Width = 400;
-            // 
-            // ColInstrAssembly
-            // 
-            this.ColInstrAssembly.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.ColInstrAssembly.FillWeight = 250F;
-            this.ColInstrAssembly.HeaderText = "Assembly";
-            this.ColInstrAssembly.Name = "ColInstrAssembly";
-            this.ColInstrAssembly.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ColInstrAssembly.Width = 200;
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 23.84052F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 76.15948F));
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1229, 472);
+            this.tableLayoutPanel1.TabIndex = 0;
             // 
             // NestConfiguration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(1243, 212);
+            this.ClientSize = new System.Drawing.Size(1243, 505);
             this.Controls.Add(this.tabControlDUTConfiguration);
             this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MinimumSize = new System.Drawing.Size(1259, 140);
@@ -780,6 +809,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDevices)).EndInit();
             this.toolStripInstruments.ResumeLayout(false);
             this.toolStripInstruments.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -835,5 +865,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ColInstrPort;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColInstrAttributes;
         private System.Windows.Forms.DataGridViewComboBoxColumn ColInstrAssembly;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }

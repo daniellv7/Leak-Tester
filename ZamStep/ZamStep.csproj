@@ -228,7 +228,6 @@
     <Compile Include="Result.cs" />
     <Compile Include="Sequence.cs" />
     <Compile Include="SetDigitalOutput.cs" />
-    <Compile Include="SMCSlider.cs" />
     <Compile Include="Splash.cs">
       <SubType>Form</SubType>
     </Compile>
