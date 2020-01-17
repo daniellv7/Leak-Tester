@@ -634,51 +634,53 @@ namespace SSR
             {
                 ////OUTPUTS FOR CONTROL EQUIPMENT
                 Reset = new Task();
-                Reset.DOChannels.CreateChannel(Signal[$"ACT_ATEQ_RESET_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                //string test = $"ACT_ATEQ_RESET_{Name}";
+                Reset.DOChannels.CreateChannel(Signal["ATEQ RESET"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DOReset = new DigitalSingleChannelWriter(Reset.Stream);
 
                 Start = new Task();
-                Start.DOChannels.CreateChannel(Signal[$"ACT_ATEQ_START_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
-                DOStart = new DigitalSingleChannelWriter(Reset.Stream);
+                Start.DOChannels.CreateChannel(Signal["ATEQ START"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                DOStart = new DigitalSingleChannelWriter(Start.Stream);
 
                 GreenLight = new Task();
-                GreenLight.DOChannels.CreateChannel(Signal[$"ACT_SEMAPHORE_GREEN_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                GreenLight.DOChannels.CreateChannel(Signal["Luz verde"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DOGreenLight = new DigitalSingleChannelWriter(GreenLight.Stream);
 
                 RedLight = new Task();
-                RedLight.DOChannels.CreateChannel(Signal[$"ACT_SEMAPHORE_RED_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                RedLight.DOChannels.CreateChannel(Signal["Luz roja"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DORedLight = new DigitalSingleChannelWriter(RedLight.Stream);
 
                 YellowLight = new Task();
-                YellowLight.DOChannels.CreateChannel(Signal[$"ACT_SEMAPHORE_AMBER_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                YellowLight.DOChannels.CreateChannel(Signal["Luz ambar"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DOYellowLight = new DigitalSingleChannelWriter(YellowLight.Stream);
 
                 PistonOFF = new Task();
-                PistonOFF.DOChannels.CreateChannel(Signal[$"ACT_PISTON_OFF_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                PistonOFF.DOChannels.CreateChannel(Signal["Actuador piston retraido"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DOPistonOFF = new DigitalSingleChannelWriter(PistonOFF.Stream);
 
                 PistonON = new Task();
-                PistonON.DOChannels.CreateChannel(Signal[$"ACT_PISTON_ON_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                PistonON.DOChannels.CreateChannel(Signal["Actuador piston elongado"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DOPistonON = new DigitalSingleChannelWriter(PistonON.Stream);
 
+                ////SENSORS FOR CONTROL EQUIPMENT
                 Optos = new Task();
-                Optos.DIChannels.CreateChannel(Signal[$"SENS_OPTOS_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                Optos.DIChannels.CreateChannel(Signal["Optos"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DIOptos = new DigitalSingleChannelReader(Optos.Stream);
 
                 Pieza = new Task();
-                Pieza.DIChannels.CreateChannel(Signal[$"SENS_PRESENCE_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                Pieza.DIChannels.CreateChannel(Signal["Presencia"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DIPieza = new DigitalSingleChannelReader(Pieza.Stream);
 
                 Empaque = new Task();
-                Empaque.DIChannels.CreateChannel(Signal[$"SENS_SEAL_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                Empaque.DIChannels.CreateChannel(Signal["Empaque"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DIEmpaque = new DigitalSingleChannelReader(Empaque.Stream);
 
                 CarreraOFF = new Task();
-                CarreraOFF.DIChannels.CreateChannel(Signal[$"SENS_PISTON_OFF_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                CarreraOFF.DIChannels.CreateChannel(Signal["Piston retraido"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DICarreraOFF = new DigitalSingleChannelReader(CarreraOFF.Stream);
 
                 CarreraON = new Task();
-                CarreraON.DIChannels.CreateChannel(Signal[$"SENS_PISTON_ON_{Name}"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
+                CarreraON.DIChannels.CreateChannel(Signal["Piston elongado"].relay, "", ChannelLineGrouping.OneChannelForEachLine);
                 DICarreraON = new DigitalSingleChannelReader(CarreraON.Stream);
                 return true;
             }

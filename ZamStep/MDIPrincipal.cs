@@ -493,7 +493,7 @@ namespace SSR
             using (Task ESTOP = DaqSystem.Local.LoadTask("SENS_ESTOP"))
             {
                 DigitalSingleChannelReader dscr = new DigitalSingleChannelReader(ESTOP.Stream);
-                if (dscr.ReadSingleSampleSingleLine())
+                if (!dscr.ReadSingleSampleSingleLine())
                     state = 100;
             }
 

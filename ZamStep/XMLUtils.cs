@@ -94,6 +94,7 @@ namespace SSR
                     return false;
                 doc.Load("Leak Tester.xml");
                 //Load tests
+                //string test = "/LeakTester/VARIANT[@id='" + variant + "']/NEST[@id='" + dutNumber + "']/tests";
                 DUTroot = doc.SelectSingleNode("/LeakTester/VARIANT[@id='" + variant +"']/NEST[@id='" + dutNumber + "']/tests");
                 if (DUTroot != null)
                 {

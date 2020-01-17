@@ -368,8 +368,8 @@
             this.toolStripLabelResult.BackColor = System.Drawing.Color.MediumTurquoise;
             this.toolStripLabelResult.Font = new System.Drawing.Font("Calibri", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStripLabelResult.Name = "toolStripLabelResult";
-            this.toolStripLabelResult.Size = new System.Drawing.Size(72, 39);
-            this.toolStripLabelResult.Text = "FLM";
+            this.toolStripLabelResult.Size = new System.Drawing.Size(185, 39);
+            this.toolStripLabelResult.Text = "LEAK TESTER";
             // 
             // toolStripSeparator1
             // 
@@ -516,7 +516,7 @@
             this.MainMenuStrip = this.menuStrip;
             this.Name = "MDIPrincipal";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "FLM";
+            this.Text = "LEAK TESTER";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MDIPrincipal_FormClosing);
             this.Load += new System.EventHandler(this.MDIPrincipal_Load);
