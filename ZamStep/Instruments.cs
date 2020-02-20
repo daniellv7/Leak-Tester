@@ -13,6 +13,8 @@ using AVT.CAN.Enums;
 using Zamtest.Generic.RS232;
 using System.Diagnostics;
 using Zamtest.Keyence.SR;
+using Cognex.Scanner.DM474X_R;
+
 namespace SSR
 {
     public class Instruments
@@ -34,9 +36,10 @@ namespace SSR
         //}
 
         internal epsonTMU220 epson;
-        internal Scanner scanner;
+        //internal Scanner scanner;
         internal RS232 rs232;
-
+        internal Cognex.Scanner.DM474X_R.Device scanner;
+        
         public Result InitInstruments(Dictionary<string, TestForm.InstrParam> instr, Form f)
         {
             
@@ -64,10 +67,10 @@ namespace SSR
                                 return new Result { Failed = true, Message = $"REVISE {instrTemp.Value.port}" };
                             break;
                         }
-                    case "Zamtest.Keyence.SR.dll":
+                    case "Cognex.Scanner.DM474X-R.dll":
                         {
-                            scanner = new Scanner();
-                            if(!scanner.Connect(instrTemp.Value.port, 9004))
+                            scanner = new Cognex.Scanner.DM474X_R.Device();
+                            if(!scanner.Connect(instrTemp.Value.port))
                                 return new Result { Failed = true, Message = $"REVISE {instrTemp.Value.port}" };
                             break;
                         }
@@ -82,7 +85,7 @@ namespace SSR
                                     return new Result { Failed = true, Message = $"REVISE {instrTemp.Value.port}" };
                                 break;
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
                                 return new Result { Failed = true, Message = $"REVISE {instrTemp.Value.port}" };
                             }

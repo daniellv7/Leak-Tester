@@ -218,7 +218,8 @@ namespace SSR
             TEST,
             WAITING,
             RESULTS,
-            PARO
+            PARO,
+            CERRANDO
         }
 
             //IsTerminated = true;
@@ -814,13 +815,15 @@ namespace SSR
                             SetControlPropertyValue(labelDUTSequenceStatus, "Text", "Error initializing test signals");
                             break;
                         }
-                        if (result.Failed)
-                        {
-                            state = (int)State.INITIALIZATION;
-                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", result.Message);
-                            break;
-                        }
+                        //Skip this
+                        //
+                        //if (result.Failed)
+                        //{
+                        //    state = (int)State.INITIALIZATION;
+                        //    SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                        //    SetControlPropertyValue(labelDUTSequenceStatus, "Text", result.Message);
+                        //    break;
+                        //}
                         state = (int)State.HOME;
                         break;
                     }
@@ -878,15 +881,16 @@ namespace SSR
                         do
                         {
                             InstrumentsInstance.scanner.Scan();
-                            if (!InstrumentsInstance.scanner.Response.Contains("ERROR"))
-                                serialNumber = InstrumentsInstance.scanner.Response;
+                            if (!InstrumentsInstance.scanner.Decoded.Equals(""))
+                                serialNumber = InstrumentsInstance.scanner.Decoded;
                             i++;
                         } while (i < 5 && serialNumber == "");
                         if (serialNumber != "" && serialNumber.Contains("5"))
                         {
                             toolStripStatusSerial.Text = serialNumber;
                             barCode = serialNumber;
-                            state = (int)State.ITAC;
+                            state = (int)State.ITAC; //Habilitar cuando se utilice ITAC. By DLV 20/01/20
+                            //state = (int)State.PISTON_ON; //Deshabilitar cuando se utilice ITAC. By DLV 20/01/20
                             break;
                         }
                         else
@@ -952,23 +956,32 @@ namespace SSR
                     }
                 case 7: //Optos
                     {
-                        if (!DIPieza.ReadSingleSampleSingleLine())
+                        if (DIEmpaque.ReadSingleSampleSingleLine())
                         {
-                            state = (int)State.INSERT_PIECE;
-                            break;
-                        }
-                        if (!DIOptos.ReadSingleSampleSingleLine())
-                        {
-                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PRESIONE OPTOS CONTINUAMENTE");
-                            state = (int)State.OPTOS;
-                            break;
+                            if (!DIPieza.ReadSingleSampleSingleLine())
+                            {
+                                state = (int)State.INSERT_PIECE;
+                                break;
+                            }
+                            if (!DIOptos.ReadSingleSampleSingleLine())
+                            {
+                                SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PRESIONE OPTOS CONTINUAMENTE");
+                                state = (int)State.OPTOS;
+                                break;
+                            }
+                            else
+                            {
+                                if (statusItac == 0)
+                                    state = (int)State.SCAN;
+                                else
+                                    state = (int)State.PISTON_ON;
+                                break;
+                            }
                         }
                         else
                         {
-                            if (statusItac == 0)
-                                state = (int)State.SCAN;
-                            else
-                                state = (int)State.PISTON_ON;
+                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "NO SE DETECTA EMPAQUE");
+                            state = (int)State.OPTOS;
                             break;
                         }
                     }
@@ -1023,7 +1036,7 @@ namespace SSR
                         }
                         break;
                     }
-                case 10://VACIO
+                case 10: //VACIO (WAITING)
                     {
                         if (isComplete == 1)
                             break;
@@ -1123,7 +1136,7 @@ namespace SSR
                         state = (int)State.HOME;
                         break;
                     }
-                case 13:
+                case 13: //BOTON STOP
                     {
                         Console.WriteLine($"Cerrando Form {Name}");
                         stateMachineTimer.Enabled = false;

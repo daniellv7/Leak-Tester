@@ -41,7 +41,7 @@ namespace SSR
                     writer.WriteSingleSampleSingleLine(true, false);
                     labelStatus.Text = "OFF";
                     labelStatus.ForeColor = Color.Red;
-                    pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Visual Studio 2015\Projects\FLM 3.0\Z02L348\Secuenciador\FLM\Software\SSR\SSR\Resources\if_button_off_352905.png";
+                    pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Leak Tester\Software\Leak Tester\ZamStep\Resources\if_button_off_352905.png";
                 }
                 else
                 {
@@ -49,7 +49,7 @@ namespace SSR
                     writer.WriteSingleSampleSingleLine(true, true);
                     labelStatus.Text = "ON";
                     labelStatus.ForeColor = Color.Green;
-                    pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Visual Studio 2015\Projects\FLM 3.0\Z02L348\Secuenciador\FLM\Software\SSR\SSR\Resources\if_button_on_352904.png";
+                    pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Leak Tester\Software\Leak Tester\ZamStep\Resources\if_button_on_352904.png";
                 }
             }
         }
@@ -70,14 +70,14 @@ namespace SSR
                 labelStatus.Text = "ON";
                 labelStatus.ForeColor = Color.Green;
                 IsActive = true;
-                pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Visual Studio 2015\Projects\FLM 3.0\Z02L348\Secuenciador\FLM\Software\SSR\SSR\Resources\if_button_on_352904.png";
+                pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Leak Tester\Software\Leak Tester\ZamStep\Resources\if_button_on_352904.png";
             }
             else
             {
                 IsActive = false;
                 labelStatus.Text = "OFF";
                 labelStatus.ForeColor = Color.Red;
-                pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Visual Studio 2015\Projects\FLM 3.0\Z02L348\Secuenciador\FLM\Software\SSR\SSR\Resources\if_button_off_352905.png";
+                pictureBoxSwitch.ImageLocation = @"C:\Users\Lear\Documents\Leak Tester\Software\Leak Tester\ZamStep\Resources\if_button_off_352905.png";
 
             }
         }

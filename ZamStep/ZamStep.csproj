@@ -82,6 +82,9 @@
     <Reference Include="CL_200A_lib">
       <HintPath>..\..\..\..\..\..\..\ELO\Assemblies\CL_200A_lib.dll</HintPath>
     </Reference>
+    <Reference Include="Cognex.Scanner.DM474X-R">
+      <HintPath>..\..\..\..\..\..\..\Leak Tester\Assemblies\Cognex.Scanner.DM474X-R.dll</HintPath>
+    </Reference>
     <Reference Include="EpsonTMU220, Version=1.1.0.1, Culture=neutral, PublicKeyToken=d1431e2eaaa3c2b7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\SSR\Assemblies\EpsonTMU220.dll</HintPath>
@@ -149,7 +152,7 @@
     </Reference>
     <Reference Include="Zamtest.Generic.RS232, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\..\FLM\Assemblies\Zamtest.Generic.RS232.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Leak Tester\Assemblies\Zamtest.Generic.RS232.dll</HintPath>
     </Reference>
     <Reference Include="Zamtest.Keyence.SR">
       <HintPath>..\..\Zamtest.Keyence.SR\Zamtest.Keyence.SR\bin\Debug\Zamtest.Keyence.SR.dll</HintPath>

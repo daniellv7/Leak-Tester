@@ -49,9 +49,9 @@ namespace SSR
                 using (Task myTask = DaqSystem.Local.LoadTask(form.Signal[form.Test[form.testCounter].param].value))
                 {
                     DigitalSingleChannelWriter dscw = new DigitalSingleChannelWriter(myTask.Stream);
-                    dscw.WriteSingleSampleSingleLine(false, true);
+                    dscw.WriteSingleSampleSingleLine(true, true);
                     Thread.Sleep(20);
-                    dscw.WriteSingleSampleSingleLine(false, false);
+                    dscw.WriteSingleSampleSingleLine(true, false);
                     Thread.Sleep(20);
                 }
                 return new object[] { true, "Digital Output Set" };
@@ -67,7 +67,7 @@ namespace SSR
             try
             {
                 bool expectedStatus = Convert.ToBoolean(form.Test[form.testCounter].response);
-                using (Task myTask = DaqSystem.Local.LoadTask(form.Signal[form.Test[form.testCounter].param].relay))
+                using (Task myTask = DaqSystem.Local.LoadTask(form.Signal[form.Test[form.testCounter].param].value))
                 {
                     DigitalSingleChannelReader dscr = new DigitalSingleChannelReader(myTask.Stream);
                     bool status = dscr.ReadSingleSampleSingleLine();
@@ -88,8 +88,9 @@ namespace SSR
             form.InstrumentsInstance.rs232.buffer.Clear();
             form.InstrumentsInstance.rs232.response = null;
             form.InstrumentsInstance.rs232.Response = null;
-            if (form.InstrumentsInstance.rs232.SendCommand(""))
+            if (!form.InstrumentsInstance.rs232.SendCommand(""))
                 return new object[] { false, "Bad response." };
+            //form.InstrumentsInstance.rs232.SendCommand("");
             while (form.InstrumentsInstance.rs232.Response == null)
             {
                 Thread.Sleep(0);

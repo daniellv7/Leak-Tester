@@ -302,7 +302,10 @@ namespace SSR
         private void toolStripButtonPlay_Click(object sender, EventArgs e)
         {
             if (selectedVariant != "")
+            {
+                state = 0;
                 StateMachine.Enabled = true;
+            }
             else
                 MessageBox.Show("Seleccione una variante", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }

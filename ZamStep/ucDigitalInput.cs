@@ -40,9 +40,9 @@ namespace SSR
                 DigitalSingleChannelReader reader = new DigitalSingleChannelReader(temp.Stream);
                 IsActive = reader.ReadSingleSampleSingleLine();
                 if (IsActive)
-                    pictureBox1.ImageLocation = @"C:\Users\Lear\Documents\Visual Studio 2015\Projects\FLM 3.0\Z02L348\Secuenciador\FLM\Software\SSR\SSR\Resources\led-on.png";
+                    pictureBox1.ImageLocation = @"C:\Users\Lear\Documents\Leak Tester\Software\Leak Tester\ZamStep\Resources\led-on.png";
                 else
-                    pictureBox1.ImageLocation = @"C:\Users\Lear\Documents\Visual Studio 2015\Projects\FLM 3.0\Z02L348\Secuenciador\FLM\Software\SSR\SSR\Resources\led-off.png";
+                    pictureBox1.ImageLocation = @"C:\Users\Lear\Documents\Leak Tester\Software\Leak Tester\ZamStep\Resources\led-off.png";
             }
         }
     }
