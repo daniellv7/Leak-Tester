@@ -23,6 +23,7 @@ namespace SSR
         private static MDIPrincipal singleton = null;
         private static readonly object padlock = new object();
         private int state = 0;
+        private bool stopBtbFlag = false;
 
         public static MDIPrincipal Singleton
         {
@@ -208,6 +209,7 @@ namespace SSR
 
         private void ExitToolsStripMenuItem_Click(object sender, EventArgs e)
         {
+            SemaphoreOff();
             Close();
         }
 
@@ -312,11 +314,30 @@ namespace SSR
 
         private void InitChildrenStateMachine()
         {
-            toolStripLabelResult.Text = "NIDOS EN EJECUCIÓN...";
-            foreach (Form child in Application.OpenForms)
+            if (!stopBtbFlag)
             {
-                if (child is TestForm)
-                    ((TestForm)child).stateMachineTimer.Enabled = true;
+                toolStripLabelResult.Text = "NIDOS EN EJECUCIÓN...";
+                foreach (Form child in Application.OpenForms)
+                {
+                    if (child is TestForm)
+                    {
+                        ((TestForm)child).stateMachineTimer.Enabled = true;
+                        ((TestForm)child).state = 0;
+                    }
+                }
+            }
+            else
+            {
+                toolStripLabelResult.Text = "NIDOS EN EJECUCIÓN...";
+                foreach (Form child in Application.OpenForms)
+                {
+                    if (child is TestForm)
+                    {
+                        ((TestForm)child).stateMachineTimer.Enabled = true;
+                        ((TestForm)child).state = 1;
+                    }
+                }
+                stopBtbFlag = false;
             }
         }
 
@@ -327,6 +348,7 @@ namespace SSR
                 if (child is TestForm)
                     ((TestForm)child).state = 12;
             }
+            StateMachine.Enabled = false;
         }
 
         internal void LoadCounters()
@@ -396,6 +418,15 @@ namespace SSR
             //menuStrip.Enabled = false;
             toolStripComboBoxVariant.Enabled = false;
             //toolsMenu.Enabled = false;
+            editMenu.Enabled = false;
+            fileMenu.Enabled = false;
+        }
+
+        public void SetControlsStateWhenEStop()
+        {
+            toolStripButtonPlay.Enabled = false;
+            toolStripButtonStop.Enabled = false;
+            toolStripComboBoxVariant.Enabled = false;
             editMenu.Enabled = false;
             fileMenu.Enabled = false;
         }
@@ -511,20 +542,26 @@ namespace SSR
                     }
                 case 1://Idle
                     {
+                        SemaphoreGreen();
                         Thread.Sleep(0);
                         break;
                     }
                 case 5://Stop button
                     {
+                        SemaphoreAmbar();
+                        StopChildrenStateMachine();
                         foreach (Form f in Application.OpenForms)
                         {
                             if (f is TestForm)
                                 ((TestForm)f).state = 13;
                         }
+                        stopBtbFlag = true;
                         break;
                     }
                 case 100://ESTOP button
                     {
+                        SemaphoreRed();
+                        SetControlsStateWhenEStop();
                         foreach (Form f in Application.OpenForms)
                         {
                             if (f is TestForm)
@@ -533,6 +570,43 @@ namespace SSR
                         break;
                     }
             }
+        }
+
+        private void SetNIOutTask(bool state, string taskName)
+        {
+            using (Task task = DaqSystem.Local.LoadTask(taskName))
+            {
+                DigitalSingleChannelWriter dscw = new DigitalSingleChannelWriter(task.Stream);
+                dscw.WriteSingleSampleSingleLine(true, state);
+            }
+        }
+
+        private void SemaphoreRed()
+        {
+            SetNIOutTask(true, "ACT_SEMAPHORE_RED");
+            SetNIOutTask(false, "ACT_SEMAPHORE_GREEN");
+            SetNIOutTask(false, "ACT_SEMAPHORE_AMBER");
+        }
+
+        private void SemaphoreGreen()
+        {
+            SetNIOutTask(false, "ACT_SEMAPHORE_RED");
+            SetNIOutTask(true, "ACT_SEMAPHORE_GREEN");
+            SetNIOutTask(false, "ACT_SEMAPHORE_AMBER");
+        }
+
+        private void SemaphoreAmbar()
+        {
+            SetNIOutTask(false, "ACT_SEMAPHORE_RED");
+            SetNIOutTask(false, "ACT_SEMAPHORE_GREEN");
+            SetNIOutTask(true, "ACT_SEMAPHORE_AMBER");
+        }
+
+        private void SemaphoreOff()
+        {
+            SetNIOutTask(false, "ACT_SEMAPHORE_RED");
+            SetNIOutTask(false, "ACT_SEMAPHORE_GREEN");
+            SetNIOutTask(false, "ACT_SEMAPHORE_AMBER");
         }
     }
 }

@@ -1123,17 +1123,28 @@ namespace SSR
                     }
                 case 12: //Paro de emergencia
                     {
-                        IsRunning = false;
-                        if (!LauncherSequence.Join(15000))
+                        if (LauncherSequence != null)
                         {
-                            LauncherSequence.Abort();
-                            LauncherSequence = null;
+                            IsRunning = false;
+                            if (!LauncherSequence.Join(10000))
+                            {
+                                LauncherSequence.Abort();
+                                LauncherSequence = null;
+                            }
+                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PARO DE EMERGENCIA");
+                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                            DOPistonON.WriteSingleSampleSingleLine(true, false);
+                            DOPistonOFF.WriteSingleSampleSingleLine(true, true);
+                            state = (int)State.HOME;
                         }
-                        SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PARO DE EMERGENCIA");
-                        SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
-                        DOPistonON.WriteSingleSampleSingleLine(true, false);
-                        DOPistonOFF.WriteSingleSampleSingleLine(true, true);
-                        state = (int)State.HOME;
+                        else 
+                        {
+                            SetControlPropertyValue(labelDUTSequenceStatus, "Text", "PARO DE EMERGENCIA");
+                            SetControlPropertyValue(labelDUTSequenceStatus, "BackColor", FAILED);
+                            DOPistonON.WriteSingleSampleSingleLine(true, false);
+                            DOPistonOFF.WriteSingleSampleSingleLine(true, true);
+                            state = (int)State.HOME;
+                        }
                         break;
                     }
                 case 13: //BOTON STOP
@@ -1147,6 +1158,7 @@ namespace SSR
                         SetControlPropertyValue(labelDUTSequenceStatus, "Text", "DETENIDO");
                         IsTerminated = true;
                         InstrumentsInstance.CloseInstruments();
+                        IsRunning = false;
                         break;
                     }
             }
