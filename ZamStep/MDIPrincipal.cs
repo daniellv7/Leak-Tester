@@ -15,6 +15,7 @@ using NationalInstruments.DAQmx;
 using System.Windows.Forms;
 using ITAC;
 using Zamtest.Utilities.Itac;
+using System.Messaging;
 
 namespace SSR
 {
@@ -73,7 +74,12 @@ namespace SSR
         internal Color FAILED = Color.Red;
         internal Color WAITING = Color.Orange;
         internal Color TESTING = Color.Yellow;
+        internal MessageQueue messageRec, messageSend;
+        internal System.Messaging.Message msgRec, msgSend;
+        internal System.Threading.Tasks.Task task;
+        internal bool stateSM;
 
+        
         public struct InstrParam
         {
             public string port;
@@ -95,6 +101,10 @@ namespace SSR
         }
         private void MDIPrincipal_Load(object sender, EventArgs e)
         {
+            //Create Q
+            SetQueue("ServiceToSeq", messageRec);
+            //Create Task
+            task = InitStateMachineMQ();
             if (Directory.Exists(@"C:\Leak Tester"))
             {
                 Directory.SetCurrentDirectory(@"C:\Leak Tester");
@@ -126,6 +136,57 @@ namespace SSR
                 MessageBox.Show("The project folder is not available, check the path", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+        }
+
+        private void SetQueue(string name, MessageQueue type)
+        {
+            if (MessageQueue.Exists(@".\Private$\" + name))
+                type = new MessageQueue(@".\Private$\" + name);
+            else
+                type = MessageQueue.Create(@".\Private$\" + name);
+        }
+
+        private async System.Threading.Tasks.Task InitStateMachineMQ()
+        {
+            await System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                while (stateSM)
+                {
+                    if (messageRec.Peek() != null)
+                    {
+                        ParseMessages(messageRec.Receive());
+                    }
+                }
+            });
+        }
+
+        private void ParseMessages(System.Messaging.Message message)
+        {
+            message.Formatter = new XmlMessageFormatter(new string[] { "System.String,mscorlib" });
+            //Console.WriteLine($"Message received {message.Body}");
+            switch (message.Body.ToString())
+            {
+                case "StartTest":
+                    EnqueueMessage("Prueba Iniciada Remotamente");
+                    break;
+                case "StopTest":
+                    EnqueueMessage("Prueba Finalizada Remotamente");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void EnqueueMessage(string text)
+        {
+            if (MessageQueue.Exists(@".\Private$\Prueba"))
+                messageSend = new MessageQueue(@".\Private$\Prueba");
+            else
+                messageSend = MessageQueue.Create(@".\Private$\Prueba");
+            msgSend = new System.Messaging.Message();
+            msgSend.Body = text;
+            msgSend.Label = "Mensaje";
+            messageSend.Send(msgSend);
         }
 
         private void DisableStartControls()
