@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using ITAC;
 using Zamtest.Utilities.Itac;
 using System.Messaging;
+using System.Windows.Threading;
 
 namespace SSR
 {
@@ -74,11 +75,10 @@ namespace SSR
         internal Color FAILED = Color.Red;
         internal Color WAITING = Color.Orange;
         internal Color TESTING = Color.Yellow;
-        internal MessageQueue messageRec, messageSend;
-        internal System.Messaging.Message msgRec, msgSend;
+        internal MessageQueue messageRec, messageSend, typeMQ;
+        internal System.Messaging.Message msgRec, msgSend ;
         internal System.Threading.Tasks.Task task;
         internal bool stateSM;
-
         
         public struct InstrParam
         {
@@ -101,8 +101,9 @@ namespace SSR
         }
         private void MDIPrincipal_Load(object sender, EventArgs e)
         {
+            stateSM = true;
             //Create Q
-            SetQueue("ServiceToSeq", messageRec);
+            messageRec = SetQueue("ServiceToSeq");
             //Create Task
             task = InitStateMachineMQ();
             if (Directory.Exists(@"C:\Leak Tester"))
@@ -138,12 +139,12 @@ namespace SSR
             }
         }
 
-        private void SetQueue(string name, MessageQueue type)
+        private MessageQueue SetQueue(string name)
         {
             if (MessageQueue.Exists(@".\Private$\" + name))
-                type = new MessageQueue(@".\Private$\" + name);
+                return  typeMQ = new MessageQueue(@".\Private$\" + name);
             else
-                type = MessageQueue.Create(@".\Private$\" + name);
+                return  typeMQ = MessageQueue.Create(@".\Private$\" + name);
         }
 
         private async System.Threading.Tasks.Task InitStateMachineMQ()
@@ -159,33 +160,54 @@ namespace SSR
                 }
             });
         }
-
+        
         private void ParseMessages(System.Messaging.Message message)
         {
             message.Formatter = new XmlMessageFormatter(new string[] { "System.String,mscorlib" });
-            //Console.WriteLine($"Message received {message.Body}");
+            Debug.WriteLine($"Message received {message.Body}");
             switch (message.Body.ToString())
             {
                 case "StartTest":
-                    EnqueueMessage("Prueba Iniciada Remotamente");
-                    break;
+                    {
+                        if (InvokeRequired)
+                            Invoke(new Action(() => StartButton()));
+                        //Dispatcher.CurrentDispatcher.Invoke(new Action(() => { StartButton(); }));
+                        //Dispatcher.CurrentDispatcher.BeginInvoke(new InvokeDelegate(StartButton));
+                        EnqueueMessage("Prueba Iniciada Remotamente");
+                        break;
+                    }
                 case "StopTest":
-                    EnqueueMessage("Prueba Finalizada Remotamente");
-                    break;
+                    {
+                        if (InvokeRequired)
+                            Invoke(new Action(() => StopButton()));
+                        EnqueueMessage("Prueba Finalizada Remotamente");
+                        break;
+                    }
+                case "StartReceiveStep":
+                    {
+                        instanceForm.ReportFlag = true;
+                        break;
+                    }
+                case "StopReceiveStep":
+                    {
+                        instanceForm.ReportFlag = false;
+                        break;
+                    }
                 default:
-                    break;
+                    {
+                        break;
+                    }
             }
         }
 
-        private void EnqueueMessage(string text)
+        public void EnqueueMessage(string text)
         {
-            if (MessageQueue.Exists(@".\Private$\Prueba"))
-                messageSend = new MessageQueue(@".\Private$\Prueba");
-            else
-                messageSend = MessageQueue.Create(@".\Private$\Prueba");
-            msgSend = new System.Messaging.Message();
-            msgSend.Body = text;
-            msgSend.Label = "Mensaje";
+            messageSend = SetQueue("SeqToService");
+            msgSend = new System.Messaging.Message
+            {
+                Body = text,
+                Label = "Mensaje"
+            };
             messageSend.Send(msgSend);
         }
 
@@ -364,6 +386,11 @@ namespace SSR
 
         private void toolStripButtonPlay_Click(object sender, EventArgs e)
         {
+            StartButton();
+        }
+
+        public void StartButton()
+        {
             if (selectedVariant != "")
             {
                 state = 0;
@@ -434,6 +461,11 @@ namespace SSR
         }
 
         private void toolStripButtonStop_Click(object sender, EventArgs e)
+        {
+            StopButton();
+        }
+
+        private void StopButton()
         {
             Cursor = Cursors.WaitCursor;
             toolStripLabelResult.Text = "DETENIENDO PROCESOS, ESPERE...";

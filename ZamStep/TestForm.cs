@@ -13,6 +13,7 @@ using Logger;
 using Zamtest.Cognex.DMXX;
 using ITAC;
 using Zamtest.Utilities.Itac;
+using Newtonsoft.Json;
 namespace SSR
 {
     public partial class TestForm : Form
@@ -108,7 +109,9 @@ namespace SSR
         internal Task Optos, Pieza, Empaque, CarreraOFF, CarreraON;
         internal DigitalSingleChannelReader DIOptos, DIPieza, DIEmpaque, DICarreraOFF, DICarreraON;
 
-
+        public bool ReportFlag { get; set; } //Flag para Envio de msj por signalR by DLV 
+        internal Step step;
+        internal string jsonMQ;
 
         public Dictionary<string, SignalParam> Signal = new Dictionary<string, SignalParam>();
         public struct SignalParam
@@ -187,6 +190,7 @@ namespace SSR
 
         private void TestForm_Load(object sender, EventArgs e)
         {
+            ReportFlag = false;
             clearListView = new ClearListViewItemsCallBack(ClearListView);
             clearRichTextBox = new ClearRichTextBoxCallBack(ClearRichTextBox);
             setElapsedTime = new SetElapsedTimeCallBack(SetElapsedTime);
@@ -315,7 +319,6 @@ namespace SSR
             Assembly currentAssembly = Assembly.GetExecutingAssembly();
             Type sequenceType = currentAssembly.GetType("SSR.Sequence");
             object assemblyInstance = Activator.CreateInstance(sequenceType, this);
-
             while (IsRunning)
             {
                 this.Invoke(setElapsedTime, new object[] { "" });
@@ -327,6 +330,7 @@ namespace SSR
                 //TESTS START HERE!!!
                 elapsedTimeStopWatch.Reset();
                 elapsedTimeStopWatch.Start();
+                step = new Step();
                 if (Properties.Settings.Default.LogFileStatus)
                 {
                     log.LogPath = Properties.Settings.Default.LogFileFolder;
@@ -343,6 +347,15 @@ namespace SSR
                     {
                         SetTestResultStatus(listViewDUTSequence, testCounter, ResultItem, "skipped", SKIPPED);
                         WriteLog(richTextBoxDUTTrace, test.Key + " skipped", TraceLevel.Info);
+                        if (ReportFlag)
+                        {                            
+                            step.State = "Skipped";
+                            step.StepNumber = test.Key + 1;
+                            step.StepName = test.Value.name;
+                            jsonMQ = JsonConvert.SerializeObject(step, Formatting.Indented);
+                            MDIPrincipal mdi = new MDIPrincipal();
+                            mdi.EnqueueMessage(jsonMQ);
+                        }
                         continue;
                     }
                     try
@@ -355,6 +368,15 @@ namespace SSR
                             if (failsCounter == Properties.Settings.Default.StopSequenceAfter)
                             {
                                 SetTestResultStatus(listViewDUTSequence, testCounter, ResultItem, "failed", FAILED);
+                                if (ReportFlag)
+                                {
+                                    step.State = "Failed";
+                                    step.StepNumber = test.Key + 1;
+                                    step.StepName = test.Value.name;
+                                    jsonMQ = JsonConvert.SerializeObject(step, Formatting.Indented);
+                                    MDIPrincipal mdi = new MDIPrincipal();
+                                    mdi.EnqueueMessage(jsonMQ);
+                                }
                                 failName = test.Value.name;
                                 if (Properties.Settings.Default.LogFileStatus)
                                 {
@@ -387,19 +409,28 @@ namespace SSR
                         else
                         {
                             SetTestResultStatus(listViewDUTSequence, testCounter, ResultItem, "passed", PASSED);
-                            if (Properties.Settings.Default.LogFileStatus)
+                            if (ReportFlag)
                             {
-                                if (result.Length > 4)
-                                {
-                                    log.WriteLogTestData(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), result[4].ToString(), test.Value.response, result[1].ToString(), result[2].ToString() });
-                                    eventsManager.log.Info(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), result[4].ToString(), test.Value.response, result[1].ToString() });
-                                }////////////////////////////////////////////////////
-                                else
-                                {
-                                    log.WriteLogTestData(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), test.Value.command, test.Value.response, result[1].ToString() });
-                                    eventsManager.log.Info(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), test.Value.command, test.Value.response, result[1].ToString() });
-                                }////////////////////////////////////////////////////
+                                step.State = "Passed";
+                                step.StepNumber = test.Key + 1;
+                                step.StepName = test.Value.name;
+                                jsonMQ = JsonConvert.SerializeObject(step, Formatting.Indented);
+                                MDIPrincipal mdi = new MDIPrincipal();
+                                mdi.EnqueueMessage(jsonMQ);
                             }
+                            if (Properties.Settings.Default.LogFileStatus)
+                                {
+                                    if (result.Length > 4)
+                                    {
+                                        log.WriteLogTestData(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), result[4].ToString(), test.Value.response, result[1].ToString(), result[2].ToString() });
+                                        eventsManager.log.Info(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), result[4].ToString(), test.Value.response, result[1].ToString() });
+                                    }////////////////////////////////////////////////////
+                                    else
+                                    {
+                                        log.WriteLogTestData(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), test.Value.command, test.Value.response, result[1].ToString() });
+                                        eventsManager.log.Info(new string[] { testCounter.ToString(), test.Value.name, test.Value.limit, test.Value.low, test.Value.high, result[0].ToString(), test.Value.command, test.Value.response, result[1].ToString() });
+                                    }////////////////////////////////////////////////////
+                                }
                             WriteLog(richTextBoxDUTTrace, " " + result[1] + " passed", TraceLevel.Info);
                         }
                     }
@@ -876,6 +907,7 @@ namespace SSR
                     }
                 case 5: //Escanner
                     {
+                        serialNumber = String.Empty;
                         barCode = "";
                         int i = 0;
                         do
@@ -884,7 +916,7 @@ namespace SSR
                             if (!InstrumentsInstance.scanner.Decoded.Equals(""))
                                 serialNumber = InstrumentsInstance.scanner.Decoded;
                             i++;
-                        } while (i < 5 && serialNumber == "");
+                        } while (i < 3 && serialNumber == "");
                         if (serialNumber != "" && serialNumber.Contains("5"))
                         {
                             toolStripStatusSerial.Text = serialNumber;

@@ -31,16 +31,16 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TestForm));
             this.tableLayoutPanelDUTSequence = new System.Windows.Forms.TableLayoutPanel();
+            this.labelStatusPiece = new System.Windows.Forms.Label();
             this.richTextBoxDUTTrace = new System.Windows.Forms.RichTextBox();
             this.listViewDUTSequence = new System.Windows.Forms.ListView();
             this.labelDUTSequenceStatus = new System.Windows.Forms.Label();
-            this.stateMachineTimer = new System.Windows.Forms.Timer(this.components);
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabeleElapsedTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelElapsed = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelSerialNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusSerial = new System.Windows.Forms.ToolStripStatusLabel();
-            this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.labelStatusPiece = new System.Windows.Forms.Label();
+            this.stateMachineTimer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanelDUTSequence.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -70,6 +70,19 @@
             this.tableLayoutPanelDUTSequence.Size = new System.Drawing.Size(264, 628);
             this.tableLayoutPanelDUTSequence.TabIndex = 8;
             // 
+            // labelStatusPiece
+            // 
+            this.labelStatusPiece.AutoSize = true;
+            this.labelStatusPiece.BackColor = System.Drawing.Color.Yellow;
+            this.labelStatusPiece.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelStatusPiece.Font = new System.Drawing.Font("Calibri", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelStatusPiece.Location = new System.Drawing.Point(3, 507);
+            this.labelStatusPiece.Name = "labelStatusPiece";
+            this.labelStatusPiece.Size = new System.Drawing.Size(258, 91);
+            this.labelStatusPiece.TabIndex = 10;
+            this.labelStatusPiece.Text = "ESPERANDO...";
+            this.labelStatusPiece.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // richTextBoxDUTTrace
             // 
             this.richTextBoxDUTTrace.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -87,9 +100,11 @@
             this.listViewDUTSequence.Activation = System.Windows.Forms.ItemActivation.OneClick;
             this.listViewDUTSequence.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewDUTSequence.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewDUTSequence.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listViewDUTSequence.FullRowSelect = true;
             this.listViewDUTSequence.GridLines = true;
             this.listViewDUTSequence.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.listViewDUTSequence.HideSelection = false;
             this.listViewDUTSequence.Location = new System.Drawing.Point(0, 3);
             this.listViewDUTSequence.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.listViewDUTSequence.MultiSelect = false;
@@ -112,10 +127,19 @@
             this.labelDUTSequenceStatus.Text = "DETENIDO";
             this.labelDUTSequenceStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // stateMachineTimer
+            // statusStrip
             // 
-            this.stateMachineTimer.Interval = 250;
-            this.stateMachineTimer.Tick += new System.EventHandler(this.stateMachineTimer_Tick);
+            this.statusStrip.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabeleElapsedTime,
+            this.toolStripStatusLabelElapsed,
+            this.toolStripStatusLabelSerialNumber,
+            this.toolStripStatusSerial});
+            this.statusStrip.Location = new System.Drawing.Point(0, 606);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(264, 22);
+            this.statusStrip.TabIndex = 9;
+            this.statusStrip.Text = "statusStrip1";
             // 
             // toolStripStatusLabeleElapsedTime
             // 
@@ -140,32 +164,10 @@
             this.toolStripStatusSerial.Name = "toolStripStatusSerial";
             this.toolStripStatusSerial.Size = new System.Drawing.Size(0, 17);
             // 
-            // statusStrip
+            // stateMachineTimer
             // 
-            this.statusStrip.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabeleElapsedTime,
-            this.toolStripStatusLabelElapsed,
-            this.toolStripStatusLabelSerialNumber,
-            this.toolStripStatusSerial});
-            this.statusStrip.Location = new System.Drawing.Point(0, 606);
-            this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(264, 22);
-            this.statusStrip.TabIndex = 9;
-            this.statusStrip.Text = "statusStrip1";
-            // 
-            // labelStatusPiece
-            // 
-            this.labelStatusPiece.AutoSize = true;
-            this.labelStatusPiece.BackColor = System.Drawing.Color.Yellow;
-            this.labelStatusPiece.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelStatusPiece.Font = new System.Drawing.Font("Calibri", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelStatusPiece.Location = new System.Drawing.Point(3, 507);
-            this.labelStatusPiece.Name = "labelStatusPiece";
-            this.labelStatusPiece.Size = new System.Drawing.Size(258, 91);
-            this.labelStatusPiece.TabIndex = 10;
-            this.labelStatusPiece.Text = "ESPERANDO...";
-            this.labelStatusPiece.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.stateMachineTimer.Interval = 250;
+            this.stateMachineTimer.Tick += new System.EventHandler(this.stateMachineTimer_Tick);
             // 
             // TestForm
             // 
