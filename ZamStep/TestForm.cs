@@ -109,8 +109,9 @@ namespace SSR
         internal Task Optos, Pieza, Empaque, CarreraOFF, CarreraON;
         internal DigitalSingleChannelReader DIOptos, DIPieza, DIEmpaque, DICarreraOFF, DICarreraON;
 
-        public bool ReportFlag { get; set; } //Flag para Envio de msj por signalR by DLV 
+        public bool ReportFlag { get { return true; } set { } } //Flag para Envio de msj por signalR by DLV 
         internal Step step;
+        internal MQResponse mqResponse;
         internal string jsonMQ;
 
         public Dictionary<string, SignalParam> Signal = new Dictionary<string, SignalParam>();
@@ -331,6 +332,7 @@ namespace SSR
                 elapsedTimeStopWatch.Reset();
                 elapsedTimeStopWatch.Start();
                 step = new Step();
+                mqResponse = new MQResponse();
                 if (Properties.Settings.Default.LogFileStatus)
                 {
                     log.LogPath = Properties.Settings.Default.LogFileFolder;
@@ -352,7 +354,9 @@ namespace SSR
                             step.State = "Skipped";
                             step.StepNumber = test.Key + 1;
                             step.StepName = test.Value.name;
-                            jsonMQ = JsonConvert.SerializeObject(step, Formatting.Indented);
+                            mqResponse.Command = mqResponse.mqDictionary[1];
+                            mqResponse.Step = step;
+                            jsonMQ = JsonConvert.SerializeObject(mqResponse, Formatting.Indented);
                             MDIPrincipal mdi = new MDIPrincipal();
                             mdi.EnqueueMessage(jsonMQ);
                         }
@@ -373,7 +377,9 @@ namespace SSR
                                     step.State = "Failed";
                                     step.StepNumber = test.Key + 1;
                                     step.StepName = test.Value.name;
-                                    jsonMQ = JsonConvert.SerializeObject(step, Formatting.Indented);
+                                    mqResponse.Command = mqResponse.mqDictionary[1];
+                                    mqResponse.Step = step;
+                                    jsonMQ = JsonConvert.SerializeObject(mqResponse, Formatting.Indented);
                                     MDIPrincipal mdi = new MDIPrincipal();
                                     mdi.EnqueueMessage(jsonMQ);
                                 }
@@ -414,9 +420,10 @@ namespace SSR
                                 step.State = "Passed";
                                 step.StepNumber = test.Key + 1;
                                 step.StepName = test.Value.name;
-                                jsonMQ = JsonConvert.SerializeObject(step, Formatting.Indented);
-                                MDIPrincipal mdi = new MDIPrincipal();
-                                mdi.EnqueueMessage(jsonMQ);
+                                mqResponse.Command = mqResponse.mqDictionary[5];
+                                mqResponse.Step = step;
+                                jsonMQ = JsonConvert.SerializeObject(mqResponse, Formatting.Indented);
+                                MDIPrincipal.Singleton.EnqueueMessage(jsonMQ);
                             }
                             if (Properties.Settings.Default.LogFileStatus)
                                 {

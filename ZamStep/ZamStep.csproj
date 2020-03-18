@@ -205,6 +205,7 @@
     <Compile Include="JSonUtilities.cs" />
     <Compile Include="ManagementEventApplication.cs" />
     <Compile Include="MeasureModel.cs" />
+    <Compile Include="MQResponse.cs" />
     <Compile Include="NestConfiguration.cs">
       <SubType>Form</SubType>
     </Compile>

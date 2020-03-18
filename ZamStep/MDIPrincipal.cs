@@ -17,6 +17,7 @@ using ITAC;
 using Zamtest.Utilities.Itac;
 using System.Messaging;
 using System.Windows.Threading;
+using Newtonsoft.Json;
 
 namespace SSR
 {
@@ -79,6 +80,7 @@ namespace SSR
         internal System.Messaging.Message msgRec, msgSend ;
         internal System.Threading.Tasks.Task task;
         internal bool stateSM;
+        internal string jsonMQ;
         
         public struct InstrParam
         {
@@ -183,15 +185,63 @@ namespace SSR
                         EnqueueMessage("Prueba Finalizada Remotamente");
                         break;
                     }
-                case "StartReceiveStep":
+                case "StartStepsTransmission":
                     {
-                        instanceForm.ReportFlag = true;
-                        break;
+                        try
+                        {
+                            instanceForm.ReportFlag = true;
+                            MQResponse mQ = new MQResponse()
+                            {
+                                Command = "StartStepsTransmission",
+                                Response = "OK"
+                            };
+                            jsonMQ = JsonConvert.SerializeObject(mQ, Formatting.Indented);
+                            EnqueueMessage(jsonMQ);
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            Error error = new Error()
+                            {
+                                Description = "There´s something wrong",
+                                Code = 1
+                            };
+                            MQResponse mQ = new MQResponse()
+                            {
+                                Command = "StartStepsTransmission",
+                                Response = "NOK",
+                                Error = error
+                            };
+                            jsonMQ = JsonConvert.SerializeObject(mQ, Formatting.Indented);
+                            EnqueueMessage(jsonMQ);
+                            break;
+                        }
                     }
-                case "StopReceiveStep":
+                case "StopStepsTransmission":
                     {
-                        instanceForm.ReportFlag = false;
-                        break;
+                        try
+                        {
+                            instanceForm.ReportFlag = false;
+                            MQResponse mQ = new MQResponse()
+                            {
+                                Command = "StopStepsTransmission",
+                                Response = "OK"
+                            };
+                            jsonMQ = JsonConvert.SerializeObject(mQ, Formatting.Indented);
+                            EnqueueMessage(jsonMQ);
+                            break;
+                        }
+                        catch(Exception ex)
+                        {
+                            MQResponse mQ = new MQResponse()
+                            {
+                                Command = "StopStepsTransmission",
+                                Response = "NOK"
+                            };
+                            jsonMQ = JsonConvert.SerializeObject(mQ, Formatting.Indented);
+                            EnqueueMessage(jsonMQ);
+                            break;
+                        }
                     }
                 default:
                     {
