@@ -8,9 +8,10 @@ namespace SSR
 {
     public class Step
     {
+        public int Socket { get; internal set; }
         public int StepNumber { get; set; }
         public string StepName { get; set; }
-        public string State { get; set; }
+        public string Status { get; set; }
 
     }
 }

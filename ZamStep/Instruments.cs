@@ -106,6 +106,8 @@ namespace SSR
                     rs232.CloseDevice();
                     rs232 = null;
                 }
+                scanner?.Disconnect();
+                scanner = null;
                 DaqSystem.Local.LoadDevice("DIO1").Reset();
             }
             catch(Exception ex)

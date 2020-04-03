@@ -17,8 +17,8 @@ using Newtonsoft.Json;
 namespace SSR
 {
     public partial class TestForm : Form
-    { 
-        NationalInstruments.DAQmx.Task OutputTask;
+    {
+        Task OutputTask;
         DigitalSingleChannelWriter Writer1;
 
         //OutputTask = new NationalInstruments.DAQmx.Task();
@@ -61,6 +61,7 @@ namespace SSR
         public string[] seed;
         public string[] key;
         public string[] secret;
+        public int SocketNumber { get; internal set; }
 
         public Thread LauncherSequence { get; set; }
         public bool IsRunning { get; set; }
@@ -109,7 +110,7 @@ namespace SSR
         internal Task Optos, Pieza, Empaque, CarreraOFF, CarreraON;
         internal DigitalSingleChannelReader DIOptos, DIPieza, DIEmpaque, DICarreraOFF, DICarreraON;
 
-        public bool ReportFlag { get { return true; } set { } } //Flag para Envio de msj por signalR by DLV 
+        public bool ReportFlag { get; set; } //Flag para Envio de msj por signalR by DLV 
         internal Step step;
         internal MQResponse mqResponse;
         internal string jsonMQ;
@@ -350,8 +351,9 @@ namespace SSR
                         SetTestResultStatus(listViewDUTSequence, testCounter, ResultItem, "skipped", SKIPPED);
                         WriteLog(richTextBoxDUTTrace, test.Key + " skipped", TraceLevel.Info);
                         if (ReportFlag)
-                        {                            
-                            step.State = "Skipped";
+                        {
+                            step.Socket = SocketNumber;
+                            step.Status = "Skipped";
                             step.StepNumber = test.Key + 1;
                             step.StepName = test.Value.name;
                             mqResponse.Command = mqResponse.mqDictionary[1];
@@ -374,7 +376,8 @@ namespace SSR
                                 SetTestResultStatus(listViewDUTSequence, testCounter, ResultItem, "failed", FAILED);
                                 if (ReportFlag)
                                 {
-                                    step.State = "Failed";
+                                    step.Socket = SocketNumber;
+                                    step.Status = "Failed";
                                     step.StepNumber = test.Key + 1;
                                     step.StepName = test.Value.name;
                                     mqResponse.Command = mqResponse.mqDictionary[1];
@@ -417,7 +420,8 @@ namespace SSR
                             SetTestResultStatus(listViewDUTSequence, testCounter, ResultItem, "passed", PASSED);
                             if (ReportFlag)
                             {
-                                step.State = "Passed";
+                                step.Socket = SocketNumber;
+                                step.Status = "Passed";
                                 step.StepNumber = test.Key + 1;
                                 step.StepName = test.Value.name;
                                 mqResponse.Command = mqResponse.mqDictionary[5];
@@ -1198,6 +1202,14 @@ namespace SSR
                         IsTerminated = true;
                         InstrumentsInstance.CloseInstruments();
                         IsRunning = false;
+                        if (IsRunning)
+                        {
+                            if (!(bool)LauncherSequence?.Join(10000))
+                            {
+                                LauncherSequence?.Abort();
+                                LauncherSequence = null;
+                            }
+                        }
                         break;
                     }
             }

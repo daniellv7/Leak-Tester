@@ -52,6 +52,9 @@ namespace SSR
                 set; get;
             }
         }
+
+        internal List<TestForm> TestForms { get; set; }
+
         public EnvironmentItac itac = new EnvironmentItac();
         private List<BackgroundWorker> backgroundworkerForms;
         public int loteStatus = 0;
@@ -78,7 +81,8 @@ namespace SSR
         internal Color TESTING = Color.Yellow;
         internal MessageQueue messageRec, messageSend, typeMQ;
         internal System.Messaging.Message msgRec, msgSend ;
-        internal System.Threading.Tasks.Task task;
+        internal System.Threading.Tasks.Task mqTask;
+        internal CancellationTokenSource cts;
         internal bool stateSM;
         internal string jsonMQ;
         
@@ -100,14 +104,15 @@ namespace SSR
         public MDIPrincipal()
         {
             InitializeComponent();
+            TestForms = new List<TestForm>();
         }
         private void MDIPrincipal_Load(object sender, EventArgs e)
         {
-            stateSM = true;
+            cts = new CancellationTokenSource();
             //Create Q
             messageRec = SetQueue("ServiceToSeq");
             //Create Task
-            task = InitStateMachineMQ();
+            mqTask = InitStateMachineMQ(cts);
             if (Directory.Exists(@"C:\Leak Tester"))
             {
                 Directory.SetCurrentDirectory(@"C:\Leak Tester");
@@ -123,7 +128,6 @@ namespace SSR
                 DisableStartControls();
                 XMLUtils.Singleton.LoadSettings();
                 LoadCounters();
-                backgroundworkerForms = new List<BackgroundWorker>();
                 windowsMenu.Enabled = false;
                 itac.User = "";
                 itac.Password = "";
@@ -149,21 +153,26 @@ namespace SSR
                 return  typeMQ = MessageQueue.Create(@".\Private$\" + name);
         }
 
-        private async System.Threading.Tasks.Task InitStateMachineMQ()
+        private async System.Threading.Tasks.Task InitStateMachineMQ(CancellationTokenSource cts)
         {
+            System.Messaging.Message[] messages;
             await System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
-                while (stateSM)
+                while (!cts.IsCancellationRequested)
                 {
-                    if (messageRec.Peek() != null)
+                    messages = messageRec.GetAllMessages();
+                    if (messages?.Length > 0)
                     {
-                        ParseMessages(messageRec.Receive());
+                        foreach (System.Messaging.Message m in messages)
+                        {
+                            ParseMQMessage(messageRec.Receive());
+                        }
                     }
                 }
             });
         }
         
-        private void ParseMessages(System.Messaging.Message message)
+        private void ParseMQMessage(System.Messaging.Message message)
         {
             message.Formatter = new XmlMessageFormatter(new string[] { "System.String,mscorlib" });
             Debug.WriteLine($"Message received {message.Body}");
@@ -189,7 +198,8 @@ namespace SSR
                     {
                         try
                         {
-                            instanceForm.ReportFlag = true;
+                            TestForms.ForEach(x => x.ReportFlag = true);
+                            //instanceForm.ReportFlag = true;
                             MQResponse mQ = new MQResponse()
                             {
                                 Command = "StartStepsTransmission",
@@ -221,7 +231,7 @@ namespace SSR
                     {
                         try
                         {
-                            instanceForm.ReportFlag = false;
+                            TestForms.ForEach(x => x.ReportFlag = false);
                             MQResponse mQ = new MQResponse()
                             {
                                 Command = "StopStepsTransmission",
@@ -270,6 +280,7 @@ namespace SSR
         internal void PaintNests()
         {
             Size s = new Size();
+            int counter = 0;
             int xPos = 0;
             int counterForms = nestInfo.Length; //invertir contador para sentido de forms
             int countBack = 0;
@@ -287,6 +298,8 @@ namespace SSR
             {
                 TestForm testForm = new TestForm();
                 testForm.Name = nest;
+                testForm.SocketNumber = ++counter;
+                Debug.WriteLine($"Socket number {counter}");
                 testForm.Text = nest + " sequence";
                 testForm.MdiParent = this;
                 testForm.Height = s.Height - 26;//Restar unos cuantos pixeles para que se ajuste mejor
@@ -461,6 +474,7 @@ namespace SSR
                     {
                         ((TestForm)child).stateMachineTimer.Enabled = true;
                         ((TestForm)child).state = 0;
+                        TestForms.Add((TestForm)child);
                     }
                 }
             }
@@ -484,7 +498,7 @@ namespace SSR
             foreach (Form child in Application.OpenForms)
             {
                 if (child is TestForm)
-                    ((TestForm)child).state = 12;
+                    ((TestForm)child).state = 13;
             }
             StateMachine.Enabled = false;
         }
@@ -523,6 +537,7 @@ namespace SSR
             SetControlsStateWhenStopped();
             toolStripLabelResult.Text = "DETENIDO";
             Cursor = Cursors.Default;
+            TestForms.Clear();
         }
 
         private void closeAllWindowsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -540,6 +555,8 @@ namespace SSR
                 if (children is TestForm)
                     children.Close();
             }
+            cts.Cancel();
+            mqTask.Wait(5000);
             GC.Collect();
         }
 
@@ -696,7 +713,10 @@ namespace SSR
                         foreach (Form f in Application.OpenForms)
                         {
                             if (f is TestForm)
+                            {
                                 ((TestForm)f).state = 13;
+                                if (((TestForm)f).Name == "NEST1") { }//shalala shalala
+                            }
                         }
                         stopBtbFlag = true;
                         break;
